@@ -131,6 +131,118 @@ After:
 
 ---
 
+### Functions ordered bottom-up (callees before callers)
+
+**Trigger:** In a file, helper/callee functions are defined *above* the higher-level functions that call them. The reader encounters implementation details before understanding the big picture.
+
+**Why:** AIs naturally write callees first (they need to know the helper's name to write the caller). But readers want the opposite: start at the high-level entry point, then drill down into details as needed. Files should read top-down like a newspaper article: headline first, details below.
+
+**Fix:** Reorder so that high-level functions appear first, with callees defined below their callers. Calls should go "downward" in the file.
+
+Before:
+```python
+def _build_title(args: list[str]) -> str:
+    ...
+
+def main() -> None:
+    ...
+    title = _build_title(args)
+    ...
+
+if __name__ == "__main__":
+    main()
+```
+
+After:
+```python
+def main() -> None:
+    ...
+    title = _build_title(args)
+    ...
+
+def _build_title(args: list[str]) -> str:
+    ...
+
+if __name__ == "__main__":
+    main()
+```
+
+**Exceptions:** Some definitions must stay at the top or bottom of a file due to technical constraints. For example, `if __name__ == "__main__":` must always remain at the bottom. Decorators must be defined before any function they decorate. Do not reorder past these constraints.
+
+---
+
+### Vague or generic names
+
+**Trigger:** A function, variable, class, or file uses a name that describes *how* it works (mechanism) rather than *what* it represents (domain concept). Common AI patterns: `tmp_file`, `data`, `result`, `process_items`, `handle_request`.
+
+**Why:** Vague names force readers to read the implementation to understand purpose. A precise name communicates intent immediately. This is often the simplest, lowest-risk revision available.
+
+**Fix:** Rename to reflect the domain concept. Propagate the rename through all callers and documentation.
+
+Before:
+```python
+def write_tmp_file(raw: bytes, title: str) -> Path: ...
+def read_tmp_file(path: Path) -> tuple[bytes, str]: ...
+```
+
+After (minimal rename, without further restructuring):
+```python
+def write_gui_request_file(raw: bytes, title: str) -> Path: ...
+def read_gui_request_file(path: Path) -> tuple[bytes, str]: ...
+```
+
+---
+
+### Data clump passed through free functions
+
+**Trigger:** Two or more standalone functions that accept or return the same bundle of parameters (e.g., `raw: bytes, title: str`).
+
+**How to recognize:** A repeated parameter group appears across multiple function signatures. Supporting signals include tightly-coupled function pairs (read/write, serialize/deserialize), but the parameter bundle is the primary trigger.
+
+**When NOT to revise:** When the functions are loosely related and share only one parameter. A single shared parameter is not a data clump.
+
+**Fix:** Introduce a `@dataclass` that holds the shared parameters and convert the free functions into methods on that class.
+
+Before:
+```python
+def write_gui_request_file(raw: bytes, title: str) -> Path:
+    meta = json.dumps({"title": title})
+    ...
+
+def read_gui_request_file(path: Path) -> tuple[bytes, str]:
+    ...
+    return raw, meta.get("title", "gvc")
+```
+
+After:
+```python
+@dataclass(frozen=True)
+class GuiRequest:
+    title: str
+    diff_bytes: bytes
+
+    def write_to(self, filepath: Path) -> None: ...
+    def write_to_temp_file(self) -> Path: ...
+
+    @staticmethod
+    def read_from(filepath: Path) -> GuiRequest: ...
+```
+
+---
+
+### Underscore-prefixed module names in applications
+
+**Trigger:** Module files named `_foo.py` in a codebase that is an application (not a library).
+
+**Why:** The underscore-prefix convention indicates "private module, not part of the public API." This is meaningful in libraries where some modules are internal implementation details. In applications, there is no public API to distinguish from, so the convention adds noise without communicating useful information.
+
+**When NOT to revise:** In libraries or packages that expose a public API to external consumers.
+
+**Fix:** Rename `_foo.py` to `foo.py`. Update all imports.
+
+---
+
 ### Loose Notes - not yet elaborated
 
 - **Local imports in main() entry points:** In files that serve as the first module loaded when Python starts (containing a `main()` function), it is *conventional* to keep project-specific (non-stdlib) imports local to `main()` or similar functions. This minimizes startup time for commands like `--help` that don't need the full module graph. Do not move these imports to the top of the file.
+- **Local imports in non-entry-point modules** should be moved to the top of the file, per standard Python convention.
