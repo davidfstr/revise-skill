@@ -242,7 +242,96 @@ class GuiRequest:
 
 ---
 
+### Manual resource cleanup
+
+**Trigger:** A resource (file, socket, connection, etc.) is opened/created in one place and cleaned up with an explicit `close()`, `unlink()`, or similar call later -- often at the end of a function or after a `try/except`.
+
+**Why:** Manual cleanup steps are easy to skip on exception paths, leading to resource leaks. AI-drafted code frequently uses this pattern because it's straightforward to write linearly.
+
+**Fix (in priority order):**
+1. **Use the resource as a context manager** if it supports the `__enter__`/`__exit__` protocol (e.g., `with open(...) as f:`).
+2. **Use `contextlib.closing()`** if the resource has a `close()` method but doesn't support the context manager protocol (e.g., `with closing(socket.socket(...)) as sock:`).
+3. **Use `try/finally`** for cleanup that doesn't fit a context manager (e.g., `sock_path.unlink()`).
+
+**When NOT to revise:** When the resource's creation and cleanup happen in different functions or different contexts (e.g., a resource created in one method and cleaned up in a callback). Structured cleanup only works when creation and cleanup are in the same scope.
+
+Before:
+```python
+server_sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+server_sock.bind(str(sock_path))
+server_sock.listen(backlog=5)
+...
+webview.start()
+server_sock.close()
+sock_path.unlink(missing_ok=True)
+```
+
+After:
+```python
+with closing(socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)) as server_sock:
+    server_sock.bind(str(sock_path))
+    try:
+        server_sock.listen(backlog=5)
+        ...
+        webview.start()
+    finally:
+        sock_path.unlink(missing_ok=True)
+```
+
+---
+
+### Parameter order mismatches visual/logical order
+
+**Trigger:** Function parameters list data elements in a different order than they appear visually in the UI, or in a different order than the conceptual data model.
+
+**Why:** When code parameters mirror visual or logical order, readers can map between code and UI/data intuitively. Mismatches create unnecessary cognitive friction.
+
+**Fix:** Reorder parameters to match the visual top-to-bottom or logical order. For UI-related code, match the order elements appear on screen.
+
+Before:
+```python
+def _open_window(raw: bytes, title: str, api, prefs_loader) -> None:
+    # title appears above the diff in the UI, but comes second in params
+```
+
+After:
+```python
+def _open_window(title: str, diff_bytes: bytes, api: AppApi, prefs_loader: _PrefsLoader) -> None:
+    # title first (top of window), then diff_bytes (window contents)
+```
+
+**Note:** This is not yet the most illustrative example. Look for better examples in future updates to this skill.
+
+---
+
+### Missing type annotations
+
+**Trigger:** Function parameters or return types without type annotations, especially for non-obvious types like callback parameters, API objects, or protocol types.
+
+**Why:** AI-drafted code frequently omits type annotations on parameters whose types aren't obvious from the name (e.g., `api`, `prefs_loader`, `callback`). Missing annotations force readers to trace through call sites to understand what a function expects.
+
+**Fix:** Add type annotations. Use `TYPE_CHECKING` blocks for imports that are only needed by the type checker. Consider introducing type aliases for complex or repeated types (e.g., `type _PrefsLoader = Callable[[], Prefs]`).
+
+Before:
+```python
+def _open_window(title: str, diff_bytes: bytes, api: AppApi, prefs_loader):
+```
+
+After:
+```python
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from gvc.app_api import AppApi
+    from gvc.prefs import Prefs
+type _PrefsLoader = Callable[[], Prefs]
+
+def _open_window(title: str, diff_bytes: bytes, api: AppApi, prefs_loader: _PrefsLoader) -> None:
+```
+
+---
+
 ### Loose Notes - not yet elaborated
 
 - **Local imports in main() entry points:** In files that serve as the first module loaded when Python starts (containing a `main()` function), it is *conventional* to keep project-specific (non-stdlib) imports local to `main()` or similar functions. This minimizes startup time for commands like `--help` that don't need the full module graph. Do not move these imports to the top of the file.
 - **Local imports in non-entry-point modules** should be moved to the top of the file, per standard Python convention.
+- **British vs. American English:** Prefer American English spelling in code comments and documentation (e.g., `behavior` not `behaviour`).
