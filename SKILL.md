@@ -191,6 +191,8 @@ def write_gui_request_file(raw: bytes, title: str) -> Path: ...
 def read_gui_request_file(path: Path) -> tuple[bytes, str]: ...
 ```
 
+**Variant -- abbreviations in API surfaces:** Avoid abbreviations in function parameters, class fields, and other API-like surfaces (e.g., `ld_info` → `large_diff_info`). These names appear in call sites, documentation, and IDE tooltips where readers lack surrounding context to decode them. Abbreviations are more acceptable in local variables where scope is small and context is immediate.
+
 **Variant -- name implies wrong type:** A name should let you guess its data type even without a type annotation. Watch for plural nouns or collective-sounding names used for scalar counts. `LARGE_BYTES` sounds like a collection of bytes; `LARGE_LINES` sounds like a list of line strings. Add a suffix like `_count` to make the type obvious.
 
 Before:
@@ -287,7 +289,32 @@ def render(file_diffs: list[FileDiff], *,
            large_diff_info: LargeDiffInfo | None = None) -> str: ...
 ```
 
-**How to spot:** Look for boolean parameters paired with data parameters that are only used inside the `if` branch. Look for dataclass fields with default values that are only set in one code path. Look for Literal types with values that imply different field sets.
+**How to spot:** Look for boolean parameters paired with data parameters that are only used inside the `if` branch. Look for dataclass fields with default values that are only set in one code path. Look for Literal types with values that imply different field sets. Look for call sites that pass meaningless placeholder values (like `[]` or `0`) to satisfy parameters that aren't relevant in that code path.
+
+**Variant -- union instead of optional:** When the conditionally-meaningful data represents a completely different input mode (not just "present or absent"), use a union type rather than an optional parameter. This forces callers to pass exactly one variant and forces the receiving function to handle each variant explicitly.
+
+Before (part 1 refactoring left the optional parameter):
+```python
+def render(file_diffs: list[FileDiff], *,
+           large_diff_info: LargeDiffInfo | None = None) -> str: ...
+
+# Caller must pass a meaningless empty list:
+render([], large_diff_info=ld_info)
+```
+
+After (union parameter -- no meaningless placeholders):
+```python
+def render(file_diffs: list[FileDiff] | LargeDiffInfo) -> str:
+    if isinstance(file_diffs, LargeDiffInfo):
+        ...
+    elif isinstance(file_diffs, list):
+        ...
+    else:
+        assert_never(file_diffs)
+
+# Caller passes exactly what it has:
+render(large_diff_info)
+```
 
 ---
 
@@ -387,6 +414,55 @@ if TYPE_CHECKING:
 type _PrefsLoader = Callable[[], Prefs]
 
 def _open_window(title: str, diff_bytes: bytes, api: AppApi, prefs_loader: _PrefsLoader) -> None:
+```
+
+---
+
+### Missing `assert_never` on union dispatch
+
+**Trigger:** An `isinstance` chain or `match` statement that dispatches on a union type and exhibits either of these antipatterns:
+
+1. **Last variant handled by unchecked `else`:** The final `else` assumes the remaining type without an explicit `isinstance`/`case` check. New variants silently fall through.
+2. **No `else` branch at all:** The chain handles all current variants but has no fallback. New variants silently do nothing.
+
+Both are unsafe: adding a new variant to the union later won't produce a type error at dispatch sites.
+
+**Fix:** Make every variant an explicit `isinstance` check (or `case`), then add a final `else: assert_never(x)` branch. Import `assert_never` from `typing`.
+
+Before (antipattern 1 -- unchecked else):
+```python
+type Shape = Triangle | Square | Circle
+
+shape: Shape = ...
+if isinstance(shape, Triangle):
+    ...
+elif isinstance(shape, Square):
+    ...
+else:  # Circle -- unsafe: silently swallows new variants
+    ...
+```
+
+Before (antipattern 2 -- no else):
+```python
+if isinstance(shape, Triangle):
+    ...
+elif isinstance(shape, Square):
+    ...
+elif isinstance(shape, Circle):
+    ...
+# no else -- unsafe: new variants silently do nothing
+```
+
+After:
+```python
+if isinstance(shape, Triangle):
+    ...
+elif isinstance(shape, Square):
+    ...
+elif isinstance(shape, Circle):
+    ...
+else:
+    assert_never(shape)
 ```
 
 ---
