@@ -191,6 +191,20 @@ def write_gui_request_file(raw: bytes, title: str) -> Path: ...
 def read_gui_request_file(path: Path) -> tuple[bytes, str]: ...
 ```
 
+**Variant -- name implies wrong type:** A name should let you guess its data type even without a type annotation. Watch for plural nouns or collective-sounding names used for scalar counts. `LARGE_BYTES` sounds like a collection of bytes; `LARGE_LINES` sounds like a list of line strings. Add a suffix like `_count` to make the type obvious.
+
+Before:
+```python
+LARGE_BYTES = 1_048_576
+LARGE_LINES = 10_000
+```
+
+After:
+```python
+_LARGE_DIFF_BYTE_COUNT = 1_048_576
+_LARGE_DIFF_LINE_COUNT = 10_000
+```
+
 ---
 
 ### Data clump passed through free functions
@@ -227,6 +241,53 @@ class GuiRequest:
     @staticmethod
     def read_from(filepath: Path) -> GuiRequest: ...
 ```
+
+---
+
+### Conditionally-meaningful fields or parameters
+
+**Trigger:** A dataclass has fields (or a function has parameters) that are only meaningful when some condition holds. Common signals: a boolean flag that gates whether sibling fields/params matter, fields with default values that are only populated for one variant of the object, or a `status` Literal with values that imply different field sets.
+
+**Why:** Conditionally-meaningful fields violate the type system's ability to enforce correctness. Callers can access `raw_size` even when `status != "large"`, getting a meaningless default. The type signature promises data that isn't always there.
+
+**Fix:** Extract the conditional fields into a separate type and use a union or optional reference. The absence of the object (`None`) replaces the boolean flag.
+
+Before:
+```python
+@dataclass
+class FileDiff:
+    status: Literal["added", "deleted", "modified", "large"]
+    old_path: str
+    new_path: str
+    # Only meaningful when status == "large":
+    raw_size: int = 0
+    raw_lines: int = 0
+
+def render(file_diffs: list[FileDiff], *, large: bool = False,
+           raw_size: int = 0, raw_lines: int = 0) -> str: ...
+```
+
+After:
+```python
+@dataclass(frozen=True)
+class LargeDiffInfo:
+    byte_count: int
+    line_count: int
+
+    @staticmethod
+    def try_parse(diff_bytes: bytes) -> LargeDiffInfo | None: ...
+
+@dataclass
+class FileDiff:
+    status: Literal["added", "deleted", "modified"]
+    old_path: str
+    new_path: str
+
+def render(file_diffs: list[FileDiff], *,
+           large_diff_info: LargeDiffInfo | None = None) -> str: ...
+```
+
+**How to spot:** Look for boolean parameters paired with data parameters that are only used inside the `if` branch. Look for dataclass fields with default values that are only set in one code path. Look for Literal types with values that imply different field sets.
 
 ---
 
@@ -374,3 +435,4 @@ class AppApi:
 - **Local imports in non-entry-point modules** should be moved to the top of the file, per standard Python convention.
 - **British vs. American English:** Prefer American English spelling in code comments and documentation (e.g., `behavior` not `behaviour`).
 - **Speculative generality / unnecessary indirection:** AI-drafted code may sometimes add abstraction layers "for flexibility" or "for testability" that have only one concrete usage and no tests. Examples: callback parameters always passed the same callable. Inline the value and remove the indirection.
+- **`try_X` naming for failable operations:** When an operation returns `None` on failure rather than raising an exception, prefer the `try_` prefix (e.g., `try_parse`, `try_send`). This signals to readers that a `None` return is expected and normal, not an error.
