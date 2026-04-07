@@ -505,6 +505,58 @@ class AppApi:
 
 ---
 
+### if/else assigning same variable → conditional expression
+
+**Trigger:** An `if/else` block where both branches assign to the same variable and the expressions are short enough to read inline.
+
+**Why:** The if/else form obscures that the block's sole purpose is to produce a single value. A conditional expression makes the intent explicit: "compute this value."
+
+**When NOT to revise:** When the branch expressions are complex, multi-line, or have side effects. If the conditional expression would exceed a comfortable line length or require nested ternaries, keep the if/else.
+
+**Fix:** Convert to a conditional expression.
+
+Before:
+```python
+if large_diff_info is not None:
+    html_doc = render(large_diff_info)
+else:
+    html_doc = render(parse(diff_bytes))
+```
+
+After:
+```python
+html_doc = (
+    render(large_diff_info)
+    if large_diff_info is not None
+    else render(parse(diff_bytes))
+)
+```
+
+---
+
+### Temporary variable that adds no explanatory value
+
+**Trigger:** A variable is assigned once, used once on the very next line (or nearby), and its name doesn't clarify intent beyond what the expression already communicates.
+
+**Why:** The variable introduces a name that the reader must track mentally without adding information. Inlining removes the indirection.
+
+**When NOT to revise:** When the variable name *explains* an otherwise obscure expression. An "explaining variable" earns its existence by giving a readable name to something that would be hard to understand inline. The test: does the variable name tell you something the expression doesn't?
+
+**Fix:** Inline the expression at its single use site.
+
+Before:
+```python
+prefs = Prefs.load()
+create_window(html_doc, title, prefs, api)
+```
+
+After:
+```python
+create_window(html_doc, title, Prefs.load(), api)
+```
+
+---
+
 ### Loose Notes - not yet elaborated
 
 - **Local imports in main() entry points:** In files that serve as the first module loaded when Python starts (containing a `main()` function), it is *conventional* to keep project-specific (non-stdlib) imports local to `main()` or similar functions. This minimizes startup time for commands like `--help` that don't need the full module graph. Do not move these imports to the top of the file.
