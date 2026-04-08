@@ -189,6 +189,7 @@ If there are no uncommitted changes, default to reviewing the last commit.
 - **Speculative generality / unnecessary indirection:** Abstraction layers with only one concrete usage and no tests. Examples: callback parameters always passed the same callable. Inline the value and remove the indirection.
 - **Underscore-prefixed module names in applications:** `_foo.py` in applications where there is no public API to distinguish from. Rename to `foo.py`.
 - **Verbose construction where simpler equivalent exists:** `{f for f in x}` → `set(x)`, `[x for x in items]` → `list(items)`, `{k: v for k, v in d.items()}` → `dict(d)`. Use the built-in constructor when the comprehension adds no filtering or transformation.
+- **Redundant safety mechanisms:** When two mechanisms provide the same guarantee, remove the more complex one. Example: `fcntl.flock` + `os.replace` -- the atomic replace already ensures last-writer-wins, making the lock unnecessary.
 
 ### Loose categories
 
