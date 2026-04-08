@@ -68,6 +68,11 @@ If there are no uncommitted changes, default to reviewing the last commit.
 
 - **[Blank lines between related blocks](patterns/blank_lines_related_blocks.md)** -- A blank line separates two tightly coupled blocks (e.g., sequential error checks on the same operation).
 
+- **[Symmetric operations split across modules](patterns/symmetric_operations_colocated.md)** -- Send/receive, read/write, encode/decode pairs live in different modules instead of adjacent in the same one.
+  ```python
+  # _ipc.py has try_send(), but _gui.py has the receive logic inline
+  ```
+
 - **[Symmetric branches as guard clause](patterns/symmetric_branches.md)** -- An `if/return` followed by the alternative case at the same level, when both branches are peer alternatives.
   ```python
   if try_send(sock_path, tmp_path):
