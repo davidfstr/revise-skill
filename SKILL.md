@@ -61,6 +61,12 @@ If there are no uncommitted changes, default to reviewing the last commit.
 
 - **[Headings to group definitions](patterns/headings_to_group.md)** -- A file has many top-level definitions (>7-10) with no visual grouping.
 
+- **[Sections grouped by kind instead of feature/concern](patterns/sections_by_kind.md)** -- Headings like "Constants", "Data Model", "Public API" lump items by what they are, not what feature they serve.
+  ```python
+  # --- Constants ---       # serves 3 different features
+  # --- Public API ---      # public vs. private is rarely useful
+  ```
+
 - **[Parameter order mismatches](patterns/parameter_order.md)** -- Parameters (or declarations) listed in a different order than their visual/logical order.
   ```python
   def _open_window(raw: bytes, title: str, ...):  # title appears first in UI
@@ -140,6 +146,11 @@ If there are no uncommitted changes, default to reviewing the last commit.
       html_doc = render(large_diff_info)
   else:
       html_doc = render(parse(diff_bytes))
+  ```
+
+- **[Dead code](patterns/dead_code.md)** -- Unused constants, unreachable branches, unused literal members, commented-out blocks. Misleads readers into thinking it matters.
+  ```python
+  _OLD_FILE = re.compile(r"^--- (?:a/)?(.+)$")   # never referenced
   ```
 
 ### Type Design
