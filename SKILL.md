@@ -117,6 +117,12 @@ If there are no uncommitted changes, default to reviewing the last commit.
   cmd = ["git", "diff", "-M"] + args
   ```
 
+- **[Docstring with implementation details](patterns/docstring_with_impl_details.md)** -- Docstring contains implementation details (why a workaround, why a specific library). Docstrings are for API guarantees; implementation rationale goes in `# NOTE:` comments.
+  ```python
+  def _is_dark_mode() -> bool:
+      """... Uses NSUserDefaults rather than ..."""  # implementation detail, not API
+  ```
+
 - **[Clarifying comments on non-obvious code](patterns/clarifying_comments.md)** -- A code block responds to a situation non-obviously (e.g., silently swallowing errors), or a paragraph is 5-7+ lines with no label.
   ```python
   except (json.JSONDecodeError, TypeError):

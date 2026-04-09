@@ -18,3 +18,15 @@ After:
 ```python
 create_window(html_doc, title, Prefs.load(), api)
 ```
+
+---
+
+**Inverse case -- named expression (walrus) as explaining name:** Sometimes a value within an expression benefits from a name even though the name is never referenced elsewhere. A walrus operator (`:=`) can name the value inline for clarity. Prefix the name with underscore to signal it is intentionally unused:
+
+```python
+# The names _bg_dark and _bg_light clarify which literal is which
+return (
+    (_bg_dark := "#0d1117") if _is_dark_mode()
+    else (_bg_light := "#ffffff")
+)
+```
