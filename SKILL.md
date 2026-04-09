@@ -134,6 +134,12 @@ If there are no uncommitted changes, default to reviewing the last commit.
 
 ### Concision
 
+- **[Duplicate code](patterns/duplicate_code.md)** -- Two+ blocks doing substantially the same thing, either >3 lines or far apart. Copies will eventually diverge.
+  ```python
+  # _render_file: icon default "⬜"    — already diverged from:
+  # _render_outline: icon default "📄"
+  ```
+
 - **[Temporary variable with no explanatory value](patterns/temporary_variable.md)** -- Variable assigned once, used once, name adds nothing the expression doesn't already say.
   ```python
   prefs = Prefs.load()
@@ -151,6 +157,14 @@ If there are no uncommitted changes, default to reviewing the last commit.
 - **[Dead code](patterns/dead_code.md)** -- Unused constants, unreachable branches, unused literal members, commented-out blocks. Misleads readers into thinking it matters.
   ```python
   _OLD_FILE = re.compile(r"^--- (?:a/)?(.+)$")   # never referenced
+  ```
+
+- **[Hand-rolled caching](patterns/hand_rolled_caching.md)** -- Module-level sentinels (`_FOO: str | None = None`) with `if _FOO is None` guard. Replace with `@cache`.
+  ```python
+  _CSS: str | None = None
+  def _assets():
+      global _CSS
+      if _CSS is None: ...
   ```
 
 ### Type Design
