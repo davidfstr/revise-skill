@@ -39,9 +39,17 @@ If there are no uncommitted changes, default to reviewing the last commit.
    2. **Test files** (test/**) -- Define acceptance criteria for a feature and exercise new API surfaces.
    3. **Product code files** -- Among these, try to identify which are higher-level entrypoints and review those first.
 
-3. **Review each file** in the determined order, looking for any of the code smells described below.
+3. **Pass 1 -- Immediate fixes.** Review each file in order. For each code smell found:
+   - **Apply immediately** if the fix is small and localized (rename, inline, add comment, extract helper, etc.).
+   - **Defer** if the fix would cause large diff traffic or is more like a new feature than a small revision. Record deferred fixes per file. Common reasons to defer:
+     - **High diff traffic:** Reordering top-level sections/functions, changing indentation style. These touch many lines, easily conflict with smaller changes happening in parallel.
+     - **Non-trivial new work:** Changing build systems, configuring new tooling (linters, typecheckers), adding assets. These are features, not revisions.
 
-4. **Apply revisions** for each code smell found, following the guidance in that smell's detail file.
+4. **Review point 1.** Present the immediate fixes for review before proceeding. Also present the list of unapplied deferred fixes for confirmation.
+
+5. **Pass 2 -- Deferred fixes.** Apply the recorded deferred fixes, one file at a time.
+
+6. **Review point 2.** Present the deferred fixes for review.
 
 ## Code smells
 
