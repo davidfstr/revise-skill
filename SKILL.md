@@ -123,6 +123,12 @@ If there are no uncommitted changes, default to reviewing the last commit.
       """... Uses NSUserDefaults rather than ..."""  # implementation detail, not API
   ```
 
+- **[Obvious/redundant docstrings](patterns/obvious_docstrings.md)** -- Docstring restates what the function/test/module name already says. Especially common in AI-drafted test functions.
+  ```python
+  def test_user_can_log_in():
+      """Test that a user can log in."""  # adds nothing
+  ```
+
 - **[Clarifying comments on non-obvious code](patterns/clarifying_comments.md)** -- A code block responds to a situation non-obviously (e.g., silently swallowing errors), or a paragraph is 5-7+ lines with no label.
   ```python
   except (json.JSONDecodeError, TypeError):
@@ -204,6 +210,12 @@ If there are no uncommitted changes, default to reviewing the last commit.
 - **[Missing type annotations](patterns/missing_type_annotations.md)** -- Untyped parameters, especially non-obvious types like callbacks or API objects.
   ```python
   def _open_window(title: str, diff_bytes: bytes, api: AppApi, prefs_loader):
+  ```
+
+- **[Bare `dict` at serialization boundaries](patterns/bare_dict_at_boundary.md)** -- Function returns `dict` where data crosses systems (Python→JS, module→module). Use `TypedDict` to make the contract explicit.
+  ```python
+  def get_prefs(self) -> dict:    # shape is implicit
+      return {"font_size": ...}
   ```
 
 ### Uncategorized (elaborated)
