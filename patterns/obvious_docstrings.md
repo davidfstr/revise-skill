@@ -9,6 +9,7 @@ Common locations where AIs add these:
 - **Test functions:** `def test_user_can_log_in(): """Test that a user can log in."""` -- The test name already says this, especially when using sentence-style given-when-then naming.
 - **Module docstrings:** A module docstring that merely repeats the contained class's docstring or restates what the module name implies.
 - **Short self-explanatory functions:** `def _expand_tabs(text: str, tabsize: int = 4) -> str: """Expand tabs to spaces."""` -- Borderline; depends on whether the function name is clear enough in context.
+- **Decorative file banners:** `/* === ProjectName — ModuleName | filename.js === */` -- Restates the filename, which the reader already knows. Very common in AI-drafted code across all languages.
 
 ## Why revise
 
