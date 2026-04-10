@@ -34,6 +34,17 @@ if __name__ == "__main__":
     main()
 ```
 
-**How to apply:** Use the `mcp__revise__move_string_in_file` tool to efficiently move function/class definitions around without needing to retype them. This is much less error-prone than cut-and-paste via the standard editing tools.
+**How to apply:** The best tool depends on what's being reordered.
+
+Use `mcp__revise__move_string_in_file` to efficiently reorder items that have **unique boundary lines**, without requiring a manual copy-and-paste. Works well for:
+- **Functions and classes** — `def` and `class` signatures are usually unique
+- **`# === Header ===` sections**
+
+Use `Write` (full rewrite) when reordering items with **non-unique boundaries** or when merging sections. In particular use `Write` with:
+- **`# ---...\n# Header` sections** -- the delimiter line is identical everywhere; each move leaves orphaned delimiters behind, requiring a cleanup Edit pass
+
+For files under ~300 lines where you already have the content in context a full `Write` is often one operation vs. many moves + edits.
+
+To verify the result, use `mcp__revise__outline_file` — it shows definitions and section headings at all indent levels, similar to VS Code's folded view, without the noise of a full file read.
 
 **Exceptions:** Some definitions must stay at the top or bottom of a file due to technical constraints. For example, `if __name__ == "__main__":` must always remain at the bottom. Decorators must be defined before any function they decorate. Do not reorder past these constraints.
