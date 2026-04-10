@@ -96,6 +96,8 @@ If there are no uncommitted changes, default to reviewing the last commit.
 
 ### Good Names
 
+An `mcp__revise__rename_symbol` tool is available for quickly renaming functions, variables, modules, and other symbols. Details: <reference/rename_symbol.md>
+
 - **[Vague or generic names](patterns/vague_generic_names.md)** -- Name describes mechanism (`tmp_file`, `data`, `result`) rather than domain concept.
   ```python
   def write_tmp_file(raw: bytes, title: str) -> Path: ...
