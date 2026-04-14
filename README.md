@@ -6,8 +6,6 @@ An [Agent Skill] that performs common code quality revisions on AI-drafted code,
 
 [Agent Skill]: https://agentskills.io/
 
-None of the revision types codified in this skill are speculative; they all originate from actual revisions I made to real code.
-
 ## Why?
 
 Reviewing/revising AI generated code is now the bottleneck for me when using AI agent harnesses like Claude Code and VS Code Copilot Agent to write software. **This skill teaches an agent to revise its own code, in the same way that I would do so personally**, so that I can automate away commonplace revisions in advance of human review.
@@ -29,6 +27,8 @@ The skill checks for **code smells** organized into categories:
 | **Type Safety** | Missing `assert_never`, untyped parameters, `type: ignore` / `cast` overuse |
 
 Each pattern has a detailed guide with rationale, "when NOT to apply" notes, and before/after examples — see the [patterns/](patterns/) directory.
+
+None of the revision types codified in this skill are speculative; they all originate from actual revisions I made to real code.
 
 ## Installation
 
