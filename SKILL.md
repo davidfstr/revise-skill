@@ -1,6 +1,6 @@
 ---
 name: revise
-description: Perform common code quality revisions on AI-drafted code. Use when reviewing recently drafted code for readability and maintainability improvements.
+description: Perform common code quality revisions on AI-drafted code. Use when reviewing recently drafted code for readability and maintainability improvements. Use when asked to learn new revise patterns from a commit or diff.
 disable-model-invocation: true
 argument-hint: "[diff-spec]"
 ---
@@ -251,6 +251,45 @@ Categories that may emerge as more patterns are discovered:
 - **Define errors out of existence** -- similar to Type Design
 - **Cohesion**
 - **Correctness**
+
+---
+
+## How to learn new patterns from a commit
+
+Invoked when the user says something like "Learn any new revise patterns from commit `<SHA>`" or "Review the revisions I made to AI-drafted code in commit `<SHA>`".
+
+The user has manually revised code that an AI previously drafted, and captured those revisions in a single commit. The goal is to extract *generalizable* patterns from that commit and codify them into this skill, so future `/revise` runs catch the same issues automatically.
+
+### Procedure
+
+1. **Examine the commit's diff.**
+   - Run `git show -U10 -w <SHA>`.
+     - `-U10` gives enough context to see what's going on without being too noisy.
+     - `-w` ignores whitespace changes, which makes indentation-only revisions far less noisy.
+     - `show` (vs. `diff`) includes the commit *message*, which often summarizes the user's intent.
+   - If `<SHA>` is omitted, default to `HEAD`.
+
+2. **Interview the user.** Use the `AskUserQuestion` tool. Ask about:
+   - **Why specific revisions were made**, when the rationale isn't obvious from the diff alone. Surface-level changes often hide a deeper principle worth codifying.
+   - **Why expected revisions were NOT made.** Scan the pre-revision code for patterns already in this skill -- if a pattern *would* have triggered but the user left the code alone, that's a boundary condition worth capturing. Don't only learn from changes; learn from the user's deliberate non-changes too.
+   - **Where a revision fits** among existing patterns -- is it a new pattern, a refinement of an existing one, or an inverse/complementary case?
+
+   Keep questions focused and batched. Prefer a few well-chosen questions over an exhaustive interrogation.
+
+3. **Draft an update to the skill.** For each generalizable pattern learned:
+   - If the pattern is genuinely new: add a bullet under the appropriate category in SKILL.md, and create a detail file in `patterns/<name>.md`.
+   - If the pattern refines or qualifies an existing one: update the existing detail file (add a "When NOT to revise" entry, an inverse case, or a clarifying example) rather than creating a new one.
+   - Follow the structure of existing pattern files: **Quick trigger**, **Why revise**, **When NOT to revise**, **Fix**, **Example (Before/After)**.
+   - Capture the user's *rationale* in the pattern file, not just the mechanical rule. The "why" lets future-me judge edge cases.
+
+4. **Reevaluate skill organization.** After drafting updates, check whether the skill still reads well at a high level. Reorganize if needed -- see [organization-guidelines.md](organization-guidelines.md) for the principles (7-10 items per category, progressive disclosure, categories close to recognizable situations).
+
+### What counts as a generalizable pattern
+
+- **Generalizable:** applies across files, languages, or projects -- e.g., "docstrings should state API guarantees, not implementation details."
+- **Not generalizable:** one-off cleanups tied to this specific codebase's history, tooling, or content -- e.g., "switched the build system from Hatch to Poetry," "moved the paused PyInstaller packaging files to a side branch," or "added a screenshot to README." These are project decisions, not code-quality patterns. They belong in the commit message, not the skill.
+
+When in doubt, ask: *would this same revision make sense in a different codebase written by a different team?* If yes, it's a pattern.
 
 ---
 
