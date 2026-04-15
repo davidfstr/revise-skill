@@ -139,6 +139,14 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
       """Test that a user can log in."""  # adds nothing
   ```
 
+- **[Unprefixed comments should describe the next code](patterns/unprefixed_comment_scope.md)** -- Unprefixed comments label *what* the immediately following code does. General commentary belongs under `NOTE:` or in documentation.
+  ```python
+  # Internal dispatch: the bundled executable is dual-purpose. When another
+  # gvc process invokes it with `--gui-server <request_file>` (see below),
+  # act as the persistent GUI server instead of the CLI.
+  if args and args[0] == "--gui-server":
+  ```
+
 - **[Clarifying comments on non-obvious code](patterns/clarifying_comments.md)** -- A code block responds to a situation non-obviously (e.g., silently swallowing errors), or a paragraph is 5-7+ lines with no label.
   ```python
   except (json.JSONDecodeError, TypeError):
