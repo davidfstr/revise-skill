@@ -195,6 +195,11 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   _OLD_FILE = re.compile(r"^--- (?:a/)?(.+)$")   # never referenced
   ```
 
+- **[Unnecessarily quoted type annotations](patterns/quoted_annotations.md)** -- Quoted annotation (`"Path | None"`) in a Python 3.14+ project where all annotations are already deferred.
+  ```python
+  def _enclosing_app_executable() -> "Path | None":  # quotes no longer needed
+  ```
+
 - **[Hand-rolled caching](patterns/hand_rolled_caching.md)** -- Module-level sentinels (`_FOO: str | None = None`) with `if _FOO is None` guard. Replace with `@cache`.
   ```python
   _CSS: str | None = None
