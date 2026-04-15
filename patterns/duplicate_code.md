@@ -17,25 +17,80 @@ Duplicate code that must stay in sync will eventually diverge. When one copy is 
 - When the "duplicates" are coincidentally similar but serve different purposes and would likely evolve independently. Extracting them would create a false coupling.
 - When the extraction would require passing many parameters, making the helper harder to understand than the duplicated code.
 
-## Necessary duplication across language boundaries
+## Necessary duplication: mark every copy with `NOTE: Duplicated in ...`
 
-Sometimes duplication is unavoidable because the copies live in different languages (e.g., a Python constant and a CSS property). In that case, **all duplicates MUST be marked with a comment** identifying every location:
+Sometimes duplication is unavoidable. Common reasons:
 
-- Format: `NOTE: Duplicated by X and Y`
-- The comment text must be **identical** at every location (ignoring language-specific comment syntax).
+- **Language boundaries:** a Python TypedDict/dataclass and its TypeScript equivalent; a Python constant and a CSS value.
+- **Build vs. runtime:** a value set in a build-system spec (PyInstaller `.spec`, Dockerfile, Vite config) that is also needed at runtime.
+- **Process boundaries:** logic that must run on the backend and the frontend (e.g., rate-limit enforcement, form validation).
+- **Parallel structures within a file:** two near-identical functions whose signatures differ enough that extracting a helper would be more confusing than the duplication.
+
+In all of these, mark each copy with a `NOTE:` comment identifying the other copies so a maintainer who touches one can find the rest. Omitting the marker is the real bug: a future reader changes one copy without knowing the others exist.
+
+### Format
+
+The default form is **bidirectional: `NOTE: Duplicated in X and Y`**. Place it at every copy. This is what you should reach for in almost every case.
+
+A rare **directional variant, `NOTE: Duplicates [structure of] X`**, is used only when one side genuinely cannot carry a matching marker:
+
+- The "source" is third-party code you cannot modify -- e.g., a Django class whose logic your application duplicates, or a framework constant you're hand-mirroring.
+- The "source" is a framework value being hand-expanded in a context where referencing it directly isn't possible (e.g., a SASS variable hand-expanded inside a Vue `<script>` `linear-gradient()` call).
+
+Placed only at the derivative; the un-markable source is referenced by name.
+
+### What `X` and `Y` should be
+
+Any identifier that lets a maintainer grep their way to the other copy. Pick whichever is most findable:
+
+- **File basenames** when the duplicate is a whole block or type: `teacher_home/types.ts and lesson_list.py`, `protocol.py and protocol.d.ts`.
+- **Qualified symbol names (with parens for functions)** when the duplicate is a specific function or method: `UserCodeAssignment.owners() and UserAssignment.can_edit_after_open()`, `proxy_http() and enforceOrRecord()`.
+- **Conceptual locations** when there's no single file or symbol: `"app_local" and "app" images`, `backend proxy and rate_limiting.js`.
+
+Use the comment syntax of the surrounding language (`#`, `//`, `/* */`).
+
+**The comment text must be identical at every copy** (ignoring language-specific comment syntax) so that a maintainer who finds one marker can grep the exact string and discover the rest. Pick one form of `X` and `Y` -- e.g. `protocol.py and protocol.d.ts` -- and use that same wording at every site, rather than mirroring the names into each language's local conventions.
+
+### Examples
+
+Cross-language type definition (bidirectional, file-based):
 
 ```python
-# NOTE: Duplicated by _BASE_FONT_SIZE and .cr-brand-header__logotext--text font-size
-_BASE_FONT_SIZE = 23
-# NOTE: Duplicated by _LIGHT_TEXT_COLOR and .cr-brand-header__logotext--text color
-_LIGHT_TEXT_COLOR = (0, 0, 0)
+# NOTE: Duplicated in protocol.py and protocol.d.ts
+class Problem(TypedDict):
+    ...
 ```
 
-```css
-    /* NOTE: Duplicated by _BASE_FONT_SIZE and .cr-brand-header__logotext--text font-size */
-    font-size: 23px;
-    /* NOTE: Duplicated by _LIGHT_TEXT_COLOR and .cr-brand-header__logotext--text color */
-    color: #000;
+```ts
+// NOTE: Duplicated in protocol.py and protocol.d.ts
+interface Problem {
+    ...
+}
+```
+
+Cross-process logic (bidirectional, symbol-based):
+
+```python
+# NOTE: Duplicated in proxy_http() and enforceOrRecord().
+if _ENABLE_RATE_LIMIT:
+    ...
+```
+
+Derivative copy of a framework value (directional):
+
+```ts
+// NOTE: Duplicates structure of linear-gradient() from $ts-gradient
+background: linear-gradient(...)
+```
+
+Build-vs.-runtime duplication (bidirectional, symbol + file):
+
+```python
+# NOTE: Duplicated in gvc.spec and _configure_app_identity()
+info_plist={
+    "CFBundleName": "gvc",
+    ...
+}
 ```
 
 ## Fix
@@ -43,7 +98,7 @@ _LIGHT_TEXT_COLOR = (0, 0, 0)
 1. Extract the duplicated logic into a function.
 2. Name the function for what it computes/returns, not for where it's called from.
 3. Replace both call sites.
-4. Check whether the copies had already diverged -- if so, decide which behavior is correct and use that in the extracted function.
+4. Check whether the copies had already diverged -- if so, ask/decide which behavior is correct and use that in the extracted function.
 
 ## Example
 
