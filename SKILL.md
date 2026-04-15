@@ -162,6 +162,12 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
 
 - **[British vs. American English](patterns/british_vs_american.md)** -- British spelling in comments/docs (e.g., `behaviour`, `initialise`).
 
+- **[Docstring verb form](patterns/docstring_verb_form.md)** -- Docstring starts with an imperative verb. Prefer third-person indicative.
+  ```python
+  def main() -> None:
+      """Build ./dist/gvc.app via PyInstaller."""  # -> "Builds ..."
+  ```
+
 ### Concision
 
 - **[Duplicate code](patterns/duplicate_code.md)** -- Two+ blocks doing substantially the same thing, either >3 lines or far apart. Copies will eventually diverge.
