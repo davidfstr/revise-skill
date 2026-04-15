@@ -2,7 +2,7 @@
 name: revise
 description: Perform common code quality revisions on AI-drafted code. Use when reviewing recently drafted code for readability and maintainability improvements. Use when asked to learn new revise patterns from a commit or diff.
 disable-model-invocation: true
-argument-hint: "[diff-spec]"
+argument-hint: commit SHA or "git diff" command to revise (or learn revision patterns from)
 ---
 
 # Revise
