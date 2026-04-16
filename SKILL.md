@@ -227,11 +227,15 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
 
 ### Type Safety
 
-- **[`assert_never` on union dispatch](patterns/assert_never.md)** -- `isinstance` chain or `match` on a union type without exhaustive fallback.
+- **[Exhaustive dispatch on variant types](patterns/assert_never.md)** -- Switch-like dispatch (if/else chain, ternary, match) on a set of known variants without an exhaustive fallback. New variants silently fall through or get swallowed by the final `else`.
   ```python
   if isinstance(shape, Triangle): ...
   elif isinstance(shape, Square): ...
   else:  # Circle -- unsafe: silently swallows new variants
+  ```
+  ```typescript
+  // ternary assumes "if not verb, must be keyword" -- unsafe
+  const cls = (type === 'verb') ? 'verb-class' : 'keyword-class';
   ```
 
 - **[`type: ignore` and `cast(...)` in typed code](patterns/type_ignore_cast.md)** -- Type-safety escape hatches that suppress real errors.
