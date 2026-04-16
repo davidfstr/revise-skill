@@ -1,6 +1,6 @@
 # Revise Skill
 
-<img src="https://github.com/davidfstr/revise-skill/blob/main/README/logo.jpg?raw=true" alt="Revise Skill logo" align="right" />
+<img src="https://github.com/davidfstr/revise-skill/blob/main/README/logo-big.svg?raw=true" alt="Revise Skill logo" align="right" width="200" />
 
 An [Agent Skill] that performs common code quality revisions on AI-drafted code, optimizing it for human readers.
 
