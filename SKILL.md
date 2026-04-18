@@ -98,9 +98,10 @@ If there are no uncommitted changes, default to reviewing the last commit.
 
 An `mcp__revise__rename_symbol` tool is available for quickly renaming functions, variables, modules, and other symbols. Details: <reference/rename_symbol.md>
 
-- **[Vague or generic names](patterns/vague_generic_names.md)** -- Name describes mechanism (`tmp_file`, `data`, `result`) rather than domain concept.
+- **[Vague or generic names](patterns/vague_generic_names.md)** -- Name describes mechanism (`tmp_file`, `data`, `result`) rather than domain concept. Also applies to function verbs like `make_X`, `do_X`, `handle_X` that hide the mechanism and overclaim scope.
   ```python
   def write_tmp_file(raw: bytes, title: str) -> Path: ...
+  def _make_editable() -> None: ...   # actually just symlinks one dir
   ```
 
 - **[Name implies wrong type](patterns/name_implies_wrong_type.md)** -- Name suggests a collection or different type than what it actually holds.
@@ -266,6 +267,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
 - **Underscore-prefixed module names in applications:** `_foo.py` in applications where there is no public API to distinguish from. Rename to `foo.py`.
 - **Verbose construction where simpler equivalent exists:** `{f for f in x}` → `set(x)`, `[x for x in items]` → `list(items)`, `{k: v for k, v in d.items()}` → `dict(d)`. Use the built-in constructor when the comprehension adds no filtering or transformation.
 - **Redundant safety mechanisms:** When two mechanisms provide the same guarantee, remove the more complex one. Example: `fcntl.flock` + `os.replace` -- the atomic replace already ensures last-writer-wins, making the lock unnecessary.
+- **`sys.exit(main())` wrapper when `main` returns `None`:** `sys.exit(None)` is equivalent to exiting normally, so `sys.exit(main())` adds no behavior beyond calling `main()`. The wrapper only earns its keep when `main` returns an exit code. Drop it (and the `sys` import if it becomes unused) when `main` is `-> None`.
 
 ### Loose categories
 

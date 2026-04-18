@@ -47,4 +47,38 @@ For files under ~300 lines where you already have the content in context a full 
 
 To verify the result, use `mcp__revise__outline_file` — it shows definitions and section headings at all indent levels, similar to VS Code's folded view, without the noise of a full file read.
 
+**Among siblings: match call order.** When a caller invokes multiple helpers, define those helpers in the order they're invoked. The file then reads in execution order.
+
+Before:
+```python
+def main() -> None:
+    ...
+    _build_icns()                                # called 1st
+    ...
+    if args.editable:
+        _symlink_editable_app_to_source_tree()   # called 2nd
+
+def _symlink_editable_app_to_source_tree() -> None:   # defined 1st — out of order
+    ...
+
+def _build_icns() -> None:                            # defined 2nd
+    ...
+```
+
+After:
+```python
+def main() -> None:
+    ...
+    _build_icns()
+    ...
+    if args.editable:
+        _symlink_editable_app_to_source_tree()
+
+def _build_icns() -> None:                            # matches call order
+    ...
+
+def _symlink_editable_app_to_source_tree() -> None:
+    ...
+```
+
 **Exceptions:** Some definitions must stay at the top or bottom of a file due to technical constraints. For example, `if __name__ == "__main__":` must always remain at the bottom. Decorators must be defined before any function they decorate. Do not reorder past these constraints.
