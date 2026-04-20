@@ -116,6 +116,21 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
 
 - **[`try_X` naming for failable operations](patterns/try_x_naming.md)** -- An operation that returns `None` on failure lacks the `try_` prefix to signal that.
 
+- **[`close()` for lifecycle teardown](patterns/lifecycle_close_naming.md)** -- Prefer `close()` over `cleanup`/`teardown`/`dispose` for resource-releasing methods. Matches stdlib convention (`file.close`, `socket.close`) and interops with `contextlib.closing`.
+  ```python
+  class GvcSandbox:
+      def cleanup(self) -> None: ...   # -> close()
+  ```
+
+### Maintainability
+
+- **[Privatize by default](patterns/privatize_by_default.md)** -- Default functions/methods to `_`-prefixed private; make public only when externally needed. Small public APIs focus attention; private methods are easier to reason about and refactor.
+  ```python
+  class TestClient:
+      def call(self, method: str): ...          # only used by ping/list_windows below
+      def ping(self): return self.call("ping")  # -> _call
+  ```
+
 ### Clarity / Anti-Obscurity
 
 - **[Magic numbers](patterns/magic_numbers.md)** -- Numeric literals used directly in logic where the meaning isn't obvious.
@@ -148,10 +163,56 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   if args and args[0] == "--gui-server":
   ```
 
+- **[Branch-scoped comments belong inside the branch](patterns/branch_scoped_comment.md)** -- When a comment explains *why one branch* of a conditional is taken, place it inside that branch — not above the whole `if`/`match`/ternary. Applies to unprefixed and prefixed comments alike.
+  ```python
+  # Unix socket paths have a 104-char limit on macOS...     # only applies to one branch
+  return root / "runtime" if root is not None else default
+  ```
+
 - **[Clarifying comments on non-obvious code](patterns/clarifying_comments.md)** -- A code block responds to a situation non-obviously (e.g., silently swallowing errors), or a paragraph is 5-7+ lines with no label.
   ```python
   except (json.JSONDecodeError, TypeError):
       return cls()  # why? intentional? looks like a bug
+  ```
+
+- **[`is not None` over truthy check for Optional](patterns/is_not_none_over_truthy.md)** -- Truthy checks on Optional values silently misbehave on falsy-valid states (`Path("")`, `0`, empty collections). Use explicit `is not None`.
+  ```python
+  return root / "runtime" if root else default   # -> `if root is not None`
+  ```
+
+### Correctness / Safety
+
+- **[Manual resource cleanup](patterns/manual_resource_cleanup.md)** -- Explicit `close()`/`unlink()` instead of context managers or `try/finally`. Cleanup is skipped on exceptions.
+  ```python
+  server_sock = socket.socket(...)
+  ...
+  server_sock.close()  # skipped on exception
+  ```
+
+- **[Counter-based wait loops](patterns/deadline_over_counter_loop.md)** -- Time-based waits should use `time.monotonic()` deadlines, not counter-based loops. `time.sleep(0.1) * 30` can take far more than 3s under load; `time.time()` is not monotonic.
+  ```python
+  for _ in range(30):           # claims "3 seconds", drifts under load
+      time.sleep(0.1)
+  ```
+
+- **[Unmarked reassignment → `# reinterpret`](patterns/unmarked_reassignment.md)** -- In Python and other non-final-by-default languages, mark intentional variable rebindings so reorders/edits treat them as anomalous.
+  ```python
+  text = _strip_frontmatter(text)   # -> # reinterpret
+  ```
+
+- **[Unmarked ordering-sensitive assignment → `# capture`](patterns/unmarked_capture.md)** -- Mark snapshots whose correctness depends on *when* the RHS is evaluated, so maintainers don't inline or reorder them.
+  ```python
+  deadline = time.monotonic() + timeout   # -> # capture
+  ```
+
+- **[Unmarked intentional copy → `# clone`](patterns/unmarked_clone.md)** -- Mark defensive copies (for iteration safety, mutation isolation) so they aren't "cleaned up" as wasteful.
+  ```python
+  for listener in list(self.listeners):   # -> # clone
+  ```
+
+- **[Prefer `const` over `let`/`var` (JS/TS)](patterns/prefer_const_over_let.md)** -- In languages with concise final-by-default variables, default to `const`; let non-`const` itself be the mutability marker.
+  ```typescript
+  let result = computeThing();   // never reassigned — should be const
   ```
 
 ### Formatting & Style
@@ -252,22 +313,28 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
       return {"font_size": ...}
   ```
 
+- **[Specific exceptions for meaningful failure modes](patterns/specific_exceptions.md)** -- `except Exception` in a targeted recovery path, or tuple-excepts lumping unrelated failures, both hide real bugs. Define a named exception for each expected-recoverable condition.
+  ```python
+  try: self._client.list_windows()
+  except Exception: pass   # server not ready? or a real bug? -> GvcGuiNotDoneStarting
+  ```
+
 ### Uncategorized (elaborated)
 
-- **[Manual resource cleanup](patterns/manual_resource_cleanup.md)** -- Explicit `close()`/`unlink()` instead of context managers or `try/finally`.
-  ```python
-  server_sock = socket.socket(...)
-  ...
-  server_sock.close()  # skipped on exception
-  ```
+- (none remaining)
 
 ### Loose patterns (not yet elaborated)
 
 - **Speculative generality / unnecessary indirection:** Abstraction layers with only one concrete usage and no tests. Examples: callback parameters always passed the same callable. Inline the value and remove the indirection.
+    - Category: "Concision"
 - **Underscore-prefixed module names in applications:** `_foo.py` in applications where there is no public API to distinguish from. Rename to `foo.py`.
+    - Category: "Good Names"
 - **Verbose construction where simpler equivalent exists:** `{f for f in x}` → `set(x)`, `[x for x in items]` → `list(items)`, `{k: v for k, v in d.items()}` → `dict(d)`. Use the built-in constructor when the comprehension adds no filtering or transformation.
+    - Category: "Concision"
 - **Redundant safety mechanisms:** When two mechanisms provide the same guarantee, remove the more complex one. Example: `fcntl.flock` + `os.replace` -- the atomic replace already ensures last-writer-wins, making the lock unnecessary.
+    - Category: "Concision"
 - **`sys.exit(main())` wrapper when `main` returns `None`:** `sys.exit(None)` is equivalent to exiting normally, so `sys.exit(main())` adds no behavior beyond calling `main()`. The wrapper only earns its keep when `main` returns an exit code. Drop it (and the `sys` import if it becomes unused) when `main` is `-> None`.
+    - Special case. Consider deletion of pattern.
 
 ### Loose categories
 
@@ -275,7 +342,6 @@ Categories that may emerge as more patterns are discovered:
 
 - **Define errors out of existence** -- similar to Type Design
 - **Cohesion**
-- **Correctness**
 
 ---
 
