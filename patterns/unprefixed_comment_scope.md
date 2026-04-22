@@ -34,6 +34,10 @@ Triage each non-local sentence in the comment:
 2. **General commentary a maintainer needs?** Prefix with `NOTE:` (and keep it near the relevant code).
 3. **Broader context or rationale?** Move to module docstring, `doc/`, or the commit message. Delete from the code.
 
+When the label describes an *action* the next code performs, prefer an imperative verb opener ("Add enough lines so that...", "Ensure renames are detected...", "Give the candidate enough content...") over a bare noun-phrase fragment ("Enough lines that...", "Content for the candidate..."). The verb nails down the relationship between label and code; a noun phrase leaves it ambiguous whether the comment is describing the *state* of something or the *action* being taken.
+
+> This is the inverse of the docstring convention (third-person indicative). Docstrings describe what a function *is*; unprefixed action-comments describe what the next lines *do*, and read most clearly as imperatives.
+
 ## Example
 
 Before -- unprefixed comment mixes a label with context a reader doesn't need at this line:

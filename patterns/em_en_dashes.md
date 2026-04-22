@@ -6,6 +6,8 @@
 
 **Fix:** Use separate sentences (with a period) or a semicolon for closely related clauses. Avoid any kind of dash to separate trailing sentence fragments.
 
+> **Do not silently replace the dash with a comma.** Em/en dashes nearly always attach an independent clause or a standalone fragment, so a comma in the same slot produces a comma splice or run-on. When a dash won't convert cleanly to `;` or `.`, rewrite the sentence rather than downgrading it to a comma.
+
 Before:
 ```python
 # Stale socket file — remove it so the next launch starts fresh
@@ -14,4 +16,9 @@ Before:
 After:
 ```python
 # Stale socket file. Remove it so the next launch starts fresh.
+```
+
+Counter-example -- **don't** just swap in a comma:
+```python
+# Stale socket file, remove it so the next launch starts fresh   # run-on
 ```
