@@ -93,6 +93,48 @@ info_plist={
 }
 ```
 
+Cross-module workaround that can't be cleanly extracted (different error semantics at each site):
+
+```python
+# src/gvc/ipc.py
+def receive(conn: socket.socket) -> Path:
+    # Force the conn into Python's timeout mode so recv() goes through
+    # poll()/select() before the syscall. ...
+    # NOTE: Duplicated in _handle_request (testmode.py) and receive (ipc.py)
+    conn.settimeout(3.0)
+    ...
+```
+
+```python
+# src/gvc/testmode.py
+def _handle_request(conn: socket.socket, api: AppApi) -> None:
+    ...
+    # Force the conn into Python's timeout mode so recv() goes through
+    # poll()/select() before the syscall. ...
+    # NOTE: Duplicated in _handle_request (testmode.py) and receive (ipc.py)
+    conn.settimeout(3.0)
+    ...
+```
+
+### Bracket the duplicated block with blank lines
+
+When the duplicated region is a sub-section of a larger function, bracket it with blank lines so the *extent* of the duplicated zone is visually obvious. Without the brackets, a reader updating one copy can't tell where "must stay in sync" ends and function-local logic begins.
+
+```python
+def _handle_request(conn: socket.socket, api: AppApi) -> None:
+    started_at = time.monotonic()  # capture
+    with closing(conn):
+        # ... multi-line comment explaining the workaround ...
+        # NOTE: Duplicated in _handle_request (testmode.py) and receive (ipc.py)
+        conn.settimeout(3.0)
+                                                 # <-- blank line: end of duplicated zone
+        chunks: list[bytes] = []                 # local to this function
+        try:
+            while chunk := conn.recv(4096):
+                chunks.append(chunk)
+        ...
+```
+
 ## Fix
 
 1. Extract the duplicated logic into a function.

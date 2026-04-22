@@ -32,6 +32,23 @@ Patterns progress through stages:
 
 Similarly, **loose categories** are listed at the bottom of the index as potential future groupings, waiting for enough patterns to justify them.
 
+## Inverse patterns: surface them, don't nest them
+
+When learning a pattern that's the *inverse* or *complementary opposite* of an existing one -- e.g., "when to REMOVE a blank line" paired with "when to ADD a blank line" -- treat the inverse as its own pattern, not as a sub-note buried inside the source pattern.
+
+**Default placement when first captured:** a top-level section at the end of the source pattern's detail file (its own `#` heading, separate from the source pattern's examples and "When NOT to revise"). This keeps the two cases discoverable together while signaling that the inverse is a distinct pattern.
+
+**Why not nest inside "When NOT to revise":** that section is for boundary conditions of the same pattern. A genuinely inverse case has its own triggers, rationale, and fix -- not just "don't apply the rule here." Burying it misleads a reader looking up the inverse directly, and the trigger-scan pass in /revise is unlikely to descend into another pattern's "When NOT" to find it.
+
+**Promote to a standalone pattern when ready:** once an inverse section has real examples and judgment calls, promote it to:
+
+1. Its own `patterns/<name>.md` file.
+2. Its own bullet in SKILL.md (possibly in a different category if the inverse belongs elsewhere).
+
+Leave a "See also" cross-reference on the source pattern's file.
+
+**Review periodically:** inverse sections that have been sitting in the bottom of their source file across several /revise sessions without growing are probably stable enough to promote -- extracting them makes them directly discoverable from the SKILL.md index.
+
 ## When to reorganize
 
 Review the skill's organization after incorporating patterns from a related sequence of commits (e.g., a multi-part refactoring). Signs that reorganization is needed:
@@ -39,3 +56,4 @@ Review the skill's organization after incorporating patterns from a related sequ
 - A category has grown past 7-10 items.
 - A pattern feels like it belongs in two categories (may need a better category boundary).
 - The "Uncategorized" or "Loose patterns" sections are growing faster than patterns graduate out of them.
+- An embedded "inverse case" section in a pattern file has accumulated enough content to justify promotion to a standalone pattern.

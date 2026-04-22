@@ -94,6 +94,13 @@ If there are no uncommitted changes, default to reviewing the last commit.
   subprocess.Popen(...)  # looks like main path, but is actually the alternative
   ```
 
+- **[Helpers belong on the class that uses them](patterns/helpers_on_class.md)** -- Module-level `_helper()` used only by one class in the same module. Hoist onto the class as `@staticmethod` to match the real scope.
+  ```python
+  class TestClient:
+      def _call(self, ...):
+          gvc_log = _read_gvc_log(...)   # -> self._read_gvc_log(...)
+  ```
+
 ### Good Names
 
 An `mcp__revise__rename_symbol` tool is available for quickly renaming functions, variables, modules, and other symbols. Details: <reference/rename_symbol.md>
@@ -232,7 +239,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
 
 ### Concision
 
-- **[Duplicate code](patterns/duplicate_code.md)** -- Two+ blocks doing substantially the same thing, either >3 lines or far apart. Copies will eventually diverge.
+- **[Duplicate code](patterns/duplicate_code.md)** -- Two+ blocks doing substantially the same thing, either >3 lines or far apart. Copies will eventually diverge. Either extract, OR when dedup is impossible/deferred, mark every copy with `NOTE: Duplicated in X and Y` (bidirectional, identical text at both sites).
   ```python
   # _render_file: icon default "⬜"    — already diverged from:
   # _render_outline: icon default "📄"
