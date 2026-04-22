@@ -49,5 +49,6 @@ data = json.loads(data)  # reinterpret
 ---
 
 Related markers (same family, different triggers):
+- [`# rename`](unmarked_rename.md) — rebinding that intentionally changes the *name* (same value), to match a narrower meaning
 - [`# capture`](unmarked_capture.md) — snapshot an ordering-sensitive value at this point
 - [`# clone`](unmarked_clone.md) — defensive copy for correctness

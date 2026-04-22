@@ -61,4 +61,5 @@ audit.record(actor=user_id, ...)
 
 Related markers (same family, different triggers):
 - [`# reinterpret`](unmarked_reassignment.md) — intentional rebinding of an existing variable
+- [`# rename`](unmarked_rename.md) — rebinding that intentionally changes the *name* (same value), to match a narrower meaning
 - [`# clone`](unmarked_clone.md) — defensive copy for correctness

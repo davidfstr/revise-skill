@@ -61,7 +61,7 @@ If there are no uncommitted changes, default to reviewing the last commit.
       from gvc.renderer import render  # should be at top of file
   ```
 
-- **[Functions ordered bottom-up](patterns/functions_ordered_bottom_up.md)** -- Callees defined above callers; reader hits details before the big picture.
+- **[Functions ordered bottom-up](patterns/functions_ordered_bottom_up.md)** -- Callees defined above callers; reader hits details before the big picture. **Always check this whenever new functions have been added to an existing file** — the cursor-position drop-in is almost never the right place in the call tree.
   ```python
   def _build_title(args): ...    # helper defined first
   def main(): ...                # entry point buried below
@@ -94,7 +94,7 @@ If there are no uncommitted changes, default to reviewing the last commit.
   subprocess.Popen(...)  # looks like main path, but is actually the alternative
   ```
 
-- **[Helpers belong on the class that uses them](patterns/helpers_on_class.md)** -- Module-level `_helper()` used only by one class in the same module. Hoist onto the class as `@staticmethod` to match the real scope.
+- **[Class-specific helpers belong on the using class](patterns/helpers_on_class.md)** -- Module-level `_helper()` used only by one class in the same module. Hoist onto the class as `@staticmethod` to match the real scope.
   ```python
   class TestClient:
       def _call(self, ...):
@@ -189,6 +189,12 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
 
 ### Correctness / Safety
 
+- **[Silent early return on failure](patterns/silent_early_return.md)** -- `return` on an unexpected condition without logging or raising leaves field debugging blind. Prefer `raise`; when log-and-return is right, format the message as `[subsystem] what happened. impact. remediation.`
+  ```python
+  if main_menu is None:
+      return   # silent — future debug session has no starting point
+  ```
+
 - **[Manual resource cleanup](patterns/manual_resource_cleanup.md)** -- Explicit `close()`/`unlink()` instead of context managers or `try/finally`. Cleanup is skipped on exceptions.
   ```python
   server_sock = socket.socket(...)
@@ -205,6 +211,12 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
 - **[Unmarked reassignment → `# reinterpret`](patterns/unmarked_reassignment.md)** -- In Python and other non-final-by-default languages, mark intentional variable rebindings so reorders/edits treat them as anomalous.
   ```python
   text = _strip_frontmatter(text)   # -> # reinterpret
+  ```
+
+- **[Unmarked value-preserving rename → `# rename`](patterns/unmarked_rename.md)** -- Mark rebindings that change the *name* (same value) to match a narrower meaning that's just become known — otherwise the duplicate assignment reads as waste.
+  ```python
+  if item.action() == "orderFrontStandardAboutPanel:":
+      about_item = item   # -> # rename
   ```
 
 - **[Unmarked ordering-sensitive assignment → `# capture`](patterns/unmarked_capture.md)** -- Mark snapshots whose correctness depends on *when* the RHS is evaluated, so maintainers don't inline or reorder them.

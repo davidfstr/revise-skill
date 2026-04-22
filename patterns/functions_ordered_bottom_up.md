@@ -4,6 +4,11 @@
 
 **Why:** AIs naturally write callees first (they need to know the helper's name to write the caller). But readers want the opposite: start at the high-level entry point, then drill down into details as needed. Files should read top-down like a newspaper article: headline first, details below.
 
+**When to consult:** Whenever new functions have been added to an *existing* file, check this pattern before approving the placement. The insertion point chosen while drafting is almost never the one the existing file's reading order wants — new helpers tend to land wherever the cursor was, not where they belong. Check two things:
+
+1. **Every call goes downward.** If `A` calls `B`, then `B` is defined below `A`. Applies transitively: `B` is also below every function that calls `A`.
+2. **Sibling helpers match call order.** If `A` calls `B` and later calls `C`, then `B` is above `C` — not just both below `A`. The file then reads in execution order.
+
 **Fix:** Reorder so that high-level functions appear first, with callees defined below their callers. Calls should go "downward" in the file.
 
 Before:
