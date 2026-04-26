@@ -22,3 +22,20 @@ Counter-example -- **don't** just swap in a comma:
 ```python
 # Stale socket file, remove it so the next launch starts fresh   # run-on
 ```
+
+## When NOT to revise
+
+**Docstring `term -- description` listings.** Python docstrings (rST/Sphinx tradition) conventionally use `--` as the separator between an exception/parameter/return name and its description. This is a long-established technical-writing convention, **not** the AI run-on style — leave it alone.
+
+```python
+def select_menuitem(self, shortcut: str) -> None:
+    """
+    Raises:
+    * RuntimeError -- if no matching menu item is found
+    * NoSuchWindow -- if a matching window does not exist
+    """
+```
+
+The trigger only fires for em/en dashes used to attach trailing *sentence fragments* in prose comments or docstring body text. List-item separators in `Raises:` / `Returns:` / `Arguments:` blocks (and similar bulleted name-then-description listings) are exempt.
+
+If a project uses a different convention for these listings (e.g., `: ` or `\n    description`), match the project's existing style — but don't invent the colon when `--` is already in use throughout the file.

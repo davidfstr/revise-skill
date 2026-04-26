@@ -220,6 +220,15 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   server_sock.close()  # skipped on exception
   ```
 
+- **[Minimize try-block scope](patterns/minimize_try_scope.md)** -- A `try:` block should contain *only* the failable statements. Move success-result assignments into an `else:` clause attached to the `try`.
+  ```python
+  try:
+      _set_window_appearance(window, appearance)
+      result = {"ok": None}      # not failable; belongs in `else:`
+  except Exception as e:
+      result = {"error": str(e)}
+  ```
+
 - **[Counter-based wait loops](patterns/deadline_over_counter_loop.md)** -- Time-based waits should use `time.monotonic()` deadlines, not counter-based loops. `time.sleep(0.1) * 30` can take far more than 3s under load; `time.time()` is not monotonic.
   ```python
   for _ in range(30):           # claims "3 seconds", drifts under load
