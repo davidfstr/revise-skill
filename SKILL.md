@@ -69,6 +69,15 @@ If there are no uncommitted changes, default to reviewing the last commit.
 
 - **[Headings to group definitions](patterns/headings_to_group.md)** -- A file has many top-level definitions (>7-10) with no visual grouping.
 
+- **[Group multiple paragraphs with anonymous block](patterns/grouped_paragraphs.md)** -- Multi-paragraph sections inside a function are labeled by a leading comment but have no visible end. Wrap in `if True:` (Python) or `{ ... }` (JS/TS/Java/C/C++) to delimit both ends.
+  ```python
+  # File menu
+  if True:
+      file_menu = AppKit.NSMenu.alloc().init()
+      ...
+      main_menu.insertItem_atIndex_(file_menu_item, 1)
+  ```
+
 - **[Sections grouped by kind instead of feature/concern](patterns/sections_by_kind.md)** -- Headings like "Constants", "Data Model", "Public API" lump items by what they are, not what feature they serve.
   ```python
   # --- Constants ---       # serves 3 different features
@@ -87,11 +96,20 @@ If there are no uncommitted changes, default to reviewing the last commit.
   # _ipc.py has try_send(), but _gui.py has the receive logic inline
   ```
 
-- **[Symmetric branches as guard clause](patterns/symmetric_branches.md)** -- An `if/return` followed by the alternative case at the same level, when both branches are peer alternatives.
+- **[Symmetric branches using guard clause](patterns/symmetric_branches.md)** -- An `if/return` followed by the alternative case at the same level, when both branches are peer alternatives.
   ```python
   if try_send(sock_path, tmp_path):
       return
   subprocess.Popen(...)  # looks like main path, but is actually the alternative
+  ```
+
+- **[Long then-block with missing/minimal else-block](patterns/long_then_block.md)** -- A long block sits indented under `if <match>:` with the surrounding scope (function, loop, branch) having nothing meaningful after it. Invert to `if not <match>: <exit>` (`return`/`continue`/`raise`) so the body un-indents.
+  ```python
+  for i in range(menu.numberOfItems()):
+      submenu = menu.itemAtIndex_(i).submenu()
+      if submenu is not None and str(submenu.title()) == "Edit":
+          ...  # 15 indented lines
+          break
   ```
 
 - **[Class-specific helpers belong on the using class](patterns/helpers_on_class.md)** -- Module-level `_helper()` used only by one class in the same module. Hoist onto the class as `@staticmethod` to match the real scope.
@@ -304,6 +322,14 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
       status: Literal["added", "deleted", "modified", "large"]
       raw_size: int = 0    # only meaningful when status == "large"
       raw_lines: int = 0
+  ```
+
+- **[Ignored None parameter](patterns/ignored_none_parameter.md)** -- A function accepts `T | None` and silently no-ops on `None`. Tighten the parameter to `T` and push the `None` check to each call site, where the surrounding context can decide what to do.
+  ```python
+  def _run_js_in_window_titled(api: AppApi, title: str | None, js: str) -> None:
+      if title is None:
+          return   # silently refuses to do what the name says
+      ...
   ```
 
 ### Type Safety

@@ -27,3 +27,8 @@ else:
     # No GUI server running. Launch one.
     subprocess.Popen(...)
 ```
+
+---
+
+Related:
+- [long_then_block.md](long_then_block.md) — inverse: when one branch *is* a precondition filter, do use a guard clause
