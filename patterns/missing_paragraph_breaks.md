@@ -9,7 +9,7 @@ Common shapes:
 
 **Why revise:** Blank lines act as paragraph breaks. Without them, scanning a function feels like reading prose with no paragraph indents — the reader cannot quickly locate phase boundaries. For duplicated regions specifically, missing brackets let the duplicated lines visually blend into surrounding logic, so a future editor may modify only one copy and miss the requirement to keep the other in sync.
 
-**When NOT to revise:** When the adjacent blocks really are one concern. See [blank_lines_related_blocks.md](blank_lines_related_blocks.md) for the inverse pattern -- *removing* blank lines between tightly coupled blocks.
+**When NOT to revise:** When the adjacent blocks really are one concern. See [split_paragraph.md](split_paragraph.md) for the inverse pattern -- *removing* blank lines between tightly coupled blocks.
 
 **Fix:** Insert a blank line at each phase boundary. Bookend `NOTE: Duplicated in X and Y` regions with blank lines on both sides.
 
@@ -77,5 +77,5 @@ def handle_request(req: Request) -> Response:
 ---
 
 Related:
-- [blank_lines_related_blocks.md](blank_lines_related_blocks.md) — inverse: when adjacent blocks are one concern, *remove* the blank line
+- [split_paragraph.md](split_paragraph.md) — inverse: when adjacent blocks are one concern, *remove* the blank line
 - [grouped_paragraphs.md](grouped_paragraphs.md) — when sub-sections grow past several paragraphs each, paragraph breaks alone aren't enough; wrap each in an anonymous block

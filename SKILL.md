@@ -74,7 +74,7 @@ If there are no uncommitted changes, default to reviewing the last commit.
       def ping(self): return self.call("ping")  # -> _call
   ```
 
-- **[Many functions with no grouping section](patterns/headings_to_group.md)** -- A file has many top-level definitions (>7-10) with no visual grouping.
+- **[Many functions with no grouping section](patterns/missing_sections.md)** -- A file has many top-level definitions (>7-10) with no visual grouping.
 
 - **[Sections grouped by kind instead of feature/concern](patterns/sections_by_kind.md)** -- Headings like "Constants", "Data Model", "Public API" lump items by what they are, not what feature they serve.
   ```python
@@ -94,16 +94,16 @@ If there are no uncommitted changes, default to reviewing the last commit.
           gvc_log = _read_gvc_log(...)   # -> self._read_gvc_log(...)
   ```
 
-- **[Definitions/parameters not in visual/logical order](patterns/parameter_order.md)** -- Parameters (or declarations) listed in a different order than their visual/logical order.
+- **[Definitions/parameters not in visual/logical order](patterns/visual_logical_ordering.md)** -- Parameters (or declarations) listed in a different order than their visual/logical order.
   ```python
   def _open_window(raw: bytes, title: str, ...):  # title appears first in UI
   ```
 
 ### Organization (within-function)
 
-- **[Single concern divided by blank line](patterns/blank_lines_related_blocks.md)** -- A blank line separates two tightly coupled blocks (e.g., sequential error checks on the same operation).
+- **[Single concern divided by blank line](patterns/split_paragraph.md)** -- A blank line separates two tightly coupled blocks (e.g., sequential error checks on the same operation).
 
-- **[Multiple concerns not separated by blank lines](patterns/missing_paragraph_breaks.md)** -- Distinct phases of a function (validation, work, result) sit adjacent without a blank line between them, so the reader can't see phase boundaries. Also covers `NOTE: Duplicated in X and Y` regions that aren't bracketed by blank lines.
+- **[Multiple concerns not separated by blank lines](patterns/missing_paragraph_breaks.md)** -- Distinct phases of a function (validation, work, result) sit adjacent without a blank line between them, so the reader can't see phase boundaries.
 
 - **[Multiple related paragraphs not grouped with anonymous block](patterns/grouped_paragraphs.md)** -- Multi-paragraph sections inside a function are labeled by a leading comment but have no visible end. Wrap in `if True:` (Python) or `{ ... }` (JS/TS/Java/C/C++) to delimit both ends.
   ```python
