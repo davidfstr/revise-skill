@@ -1,4 +1,4 @@
-# `close()` for lifecycle teardown (not `cleanup`/`teardown`/`dispose`)
+# Lifecycle teardown not named `close`
 
 ## Quick trigger
 

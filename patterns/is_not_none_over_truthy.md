@@ -1,4 +1,4 @@
-# `is not None` over truthy check for Optional values
+# Truthy check for Optional values instead of `is not None`
 
 ## Quick trigger
 

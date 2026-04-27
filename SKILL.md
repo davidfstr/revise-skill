@@ -150,9 +150,9 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   def render(fd: list[FileDiff], ld_info: LargeDiffInfo | None = None): ...
   ```
 
-- **[`try_X` naming for failable operations](patterns/try_x_naming.md)** -- An operation that returns `None` on failure lacks the `try_` prefix to signal that.
+- **[Failable operation not named `try_X`](patterns/try_x_naming.md)** -- An operation that returns `None` on failure lacks the `try_` prefix to signal that.
 
-- **[`close()` for lifecycle teardown](patterns/lifecycle_close_naming.md)** -- Prefer `close()` over `cleanup`/`teardown`/`dispose` for resource-releasing methods. Matches stdlib convention (`file.close`, `socket.close`) and interops with `contextlib.closing`.
+- **[Lifecycle teardown not named `close`](patterns/lifecycle_close_naming.md)** -- Prefer `close()` over `cleanup`/`teardown`/`dispose` for resource-releasing methods. Matches stdlib convention (`file.close`, `socket.close`) and interops with `contextlib.closing`.
   ```python
   class GvcSandbox:
       def cleanup(self) -> None: ...   # -> close()
@@ -182,7 +182,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
       """Test that a user can log in."""  # adds nothing
   ```
 
-- **[Unprefixed comments should describe the next code](patterns/unprefixed_comment_scope.md)** -- Unprefixed comments label *what* the immediately following code does. General commentary belongs under `NOTE:` or in documentation.
+- **[Unprefixed comment is general commentary](patterns/unprefixed_comment_scope.md)** -- Unprefixed comments label *what* the immediately following code does. General commentary belongs under `NOTE:` or in documentation.
   ```python
   # Internal dispatch: the bundled executable is dual-purpose. When another
   # gvc process invokes it with `--gui-server <request_file>` (see below),
@@ -190,19 +190,19 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   if args and args[0] == "--gui-server":
   ```
 
-- **[Branch-scoped comments belong inside the branch](patterns/branch_scoped_comment.md)** -- When a comment explains *why one branch* of a conditional is taken, place it inside that branch — not above the whole `if`/`match`/ternary. Applies to unprefixed and prefixed comments alike.
+- **[Branch-scoped comment placed above the conditional](patterns/branch_scoped_comment.md)** -- When a comment explains *why one branch* of a conditional is taken, place it inside that branch — not above the whole `if`/`match`/ternary. Applies to unprefixed and prefixed comments alike.
   ```python
   # Unix socket paths have a 104-char limit on macOS...     # only applies to one branch
   return root / "runtime" if root is not None else default
   ```
 
-- **[Clarifying comments on non-obvious code](patterns/clarifying_comments.md)** -- A code block responds to a situation non-obviously (e.g., silently swallowing errors), or a paragraph is 5-7+ lines with no label.
+- **[Missing clarifying comments on non-obvious code](patterns/clarifying_comments.md)** -- A code block responds to a situation non-obviously (e.g., silently swallowing errors), or a paragraph is 5-7+ lines with no label.
   ```python
   except (json.JSONDecodeError, TypeError):
       return cls()  # why? intentional? looks like a bug
   ```
 
-- **[`is not None` over truthy check for Optional](patterns/is_not_none_over_truthy.md)** -- Truthy checks on Optional values silently misbehave on falsy-valid states (`Path("")`, `0`, empty collections). Use explicit `is not None`.
+- **[Truthy check for Optional values instead of `is not None`](patterns/is_not_none_over_truthy.md)** -- Truthy checks on Optional values silently misbehave on falsy-valid states (`Path("")`, `0`, empty collections). Use explicit `is not None`.
   ```python
   return root / "runtime" if root else default   # -> `if root is not None`
   ```
@@ -222,7 +222,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   server_sock.close()  # skipped on exception
   ```
 
-- **[Minimize try-block scope](patterns/minimize_try_scope.md)** -- A `try:` block should contain *only* the failable statements. Move success-result assignments into an `else:` clause attached to the `try`.
+- **[Overscoped try-block](patterns/minimize_try_scope.md)** -- A `try:` block should contain *only* the failable statements. Move success-result assignments into an `else:` clause attached to the `try`.
   ```python
   try:
       _set_window_appearance(window, appearance)
@@ -258,7 +258,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   for listener in list(self.listeners):   # -> # clone
   ```
 
-- **[Prefer `const` over `let`/`var` (JS/TS)](patterns/prefer_const_over_let.md)** -- In languages with concise final-by-default variables, default to `const`; let non-`const` itself be the mutability marker.
+- **[`let`/`var` used instead of `const` (JS/TS)](patterns/prefer_const_over_let.md)** -- In languages with concise final-by-default variables, default to `const`; let non-`const` itself be the mutability marker.
   ```typescript
   let result = computeThing();   // never reassigned — should be const
   ```
@@ -270,9 +270,9 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   # Stale socket file — remove it so the next launch starts fresh
   ```
 
-- **[British vs. American English](patterns/british_vs_american.md)** -- British spelling in comments/docs (e.g., `behaviour`, `initialise`).
+- **[British English spelling](patterns/british_vs_american.md)** -- British spelling in comments/docs (e.g., `behaviour`, `initialise`).
 
-- **[Docstring verb form](patterns/docstring_verb_form.md)** -- Docstring starts with an imperative verb. Prefer third-person indicative.
+- **[Docstring uses imperative verb](patterns/docstring_verb_form.md)** -- Docstring starts with an imperative verb. Prefer third-person indicative.
   ```python
   def main() -> None:
       """Build ./dist/gvc.app via PyInstaller."""  # -> "Builds ..."
@@ -292,7 +292,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   create_window(html_doc, title, prefs, api)
   ```
 
-- **[if/else → conditional expression](patterns/conditional_expression.md)** -- Both branches of an if/else assign to the same variable; expressions are short.
+- **[if/else statement assigns to same variable](patterns/conditional_expression.md)** -- Both branches of an if/else assign to the same variable; expressions are short.
   ```python
   if large_diff_info is not None:
       html_doc = render(large_diff_info)
@@ -320,13 +320,13 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
 
 ### Type Design
 
-- **[Data clump → dataclass](patterns/data_clump.md)** -- Multiple functions share the same parameter bundle.
+- **[Data clump](patterns/data_clump.md)** -- Multiple functions share the same parameter bundle.
   ```python
   def write_gui_request_file(raw: bytes, title: str) -> Path: ...
   def read_gui_request_file(path: Path) -> tuple[bytes, str]: ...
   ```
 
-- **[Conditionally-meaningful fields](patterns/conditionally_meaningful_fields.md)** -- Fields/params only meaningful when some condition holds (boolean flag, status literal).
+- **[Conditionally-meaningful fields or parameters](patterns/conditionally_meaningful_fields.md)** -- Fields/params only meaningful when some condition holds (boolean flag, status literal).
   ```python
   @dataclass
   class FileDiff:
@@ -345,7 +345,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
 
 ### Type Safety
 
-- **[Exhaustive dispatch on variant types](patterns/assert_never.md)** -- Switch-like dispatch (if/else chain, ternary, match) on a set of known variants without an exhaustive fallback. New variants silently fall through or get swallowed by the final `else`.
+- **[Variant dispatch missing exhaustive fallback](patterns/assert_never.md)** -- Switch-like dispatch (if/else chain, ternary, match) on a set of known variants without an exhaustive fallback. New variants silently fall through or get swallowed by the final `else`.
   ```python
   if isinstance(shape, Triangle): ...
   elif isinstance(shape, Square): ...
@@ -369,7 +369,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
       return {"font_size": ...}
   ```
 
-- **[Specific exceptions for meaningful failure modes](patterns/specific_exceptions.md)** -- `except Exception` in a targeted recovery path, or tuple-excepts lumping unrelated failures, both hide real bugs. Define a named exception for each expected-recoverable condition.
+- **[Catching overbroad exception types](patterns/specific_exceptions.md)** -- `except Exception` in a targeted recovery path, or tuple-excepts lumping unrelated failures, both hide real bugs. Define a named exception for each expected-recoverable condition.
   ```python
   try: self._client.list_windows()
   except Exception: pass   # server not ready? or a real bug? -> GvcGuiNotDoneStarting

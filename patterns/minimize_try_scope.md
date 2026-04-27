@@ -1,4 +1,4 @@
-# Minimize try-block scope
+# Overscoped try-block
 
 ## Quick trigger
 

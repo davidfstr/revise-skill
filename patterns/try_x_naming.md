@@ -1,4 +1,4 @@
-# `try_X` naming for failable operations
+# Failable operation not named `try_X`
 
 **Trigger:** An operation that returns `None` on failure rather than raising an exception, but its name doesn't signal this behavior.
 

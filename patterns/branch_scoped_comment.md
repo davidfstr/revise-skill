@@ -1,4 +1,4 @@
-# Branch-scoped comments belong inside the branch
+# Branch-scoped comment placed above the conditional
 
 ## Quick trigger
 

@@ -1,4 +1,4 @@
-# Unprefixed comments should describe the next code
+# Unprefixed comment is general commentary
 
 ## Quick trigger
 
