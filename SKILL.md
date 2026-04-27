@@ -103,7 +103,7 @@ If there are no uncommitted changes, default to reviewing the last commit.
 
 - **[Single concern divided by blank line](patterns/blank_lines_related_blocks.md)** -- A blank line separates two tightly coupled blocks (e.g., sequential error checks on the same operation).
 
-- **Multiple concerns not separated by blank lines**
+- **[Multiple concerns not separated by blank lines](patterns/missing_paragraph_breaks.md)** -- Distinct phases of a function (validation, work, result) sit adjacent without a blank line between them, so the reader can't see phase boundaries. Also covers `NOTE: Duplicated in X and Y` regions that aren't bracketed by blank lines.
 
 - **[Multiple related paragraphs not grouped with anonymous block](patterns/grouped_paragraphs.md)** -- Multi-paragraph sections inside a function are labeled by a leading comment but have no visible end. Wrap in `if True:` (Python) or `{ ... }` (JS/TS/Java/C/C++) to delimit both ends.
   ```python

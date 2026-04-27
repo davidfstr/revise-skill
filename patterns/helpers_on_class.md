@@ -1,4 +1,4 @@
-# Helpers belong on the class that uses them
+# Class-specific helpers not on the using class
 
 ## Quick trigger
 

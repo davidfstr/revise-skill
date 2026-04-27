@@ -1,4 +1,4 @@
-# Headings to group definitions
+# Many functions with no grouping section
 
 **Trigger:** A file has many top-level definitions (more than 7-10 functions, classes, or constants) with no visual grouping. The reader must scan linearly through a long flat list.
 

@@ -1,4 +1,4 @@
-# Group multiple paragraphs with anonymous block
+# Multiple related paragraphs not grouped with anonymous block
 
 ## Quick trigger
 

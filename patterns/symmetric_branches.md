@@ -1,4 +1,4 @@
-# Symmetric branches written as guard clause
+# Guard clause followed by peer alternative
 
 **Trigger:** An `if` with an early `return` (or `continue`/`break`) followed by code at the same indentation level that handles the alternative case.
 
