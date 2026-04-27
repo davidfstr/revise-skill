@@ -150,7 +150,10 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   def render(fd: list[FileDiff], ld_info: LargeDiffInfo | None = None): ...
   ```
 
-- **[Failable operation not named `try_X`](patterns/try_x_naming.md)** -- An operation that returns `None` on failure lacks the `try_` prefix to signal that.
+- **[Failable operation not named `try_X`](patterns/try_x_naming.md)** -- A failable operation whose bare name reads as fire-and-forget or raise-on-failure (`send`, `insert`, `parse`) lacks a `try_` prefix to signal that failure is returned as a value. Most load-bearing for `bool`-returning effect methods, where the type alone can't force callers to check.
+  ```python
+  def send(sock_path, request_filepath) -> bool: ...   # -> try_send; callers may treat as fire-and-forget
+  ```
 
 - **[Lifecycle teardown not named `close`](patterns/lifecycle_close_naming.md)** -- Prefer `close()` over `cleanup`/`teardown`/`dispose` for resource-releasing methods. Matches stdlib convention (`file.close`, `socket.close`) and interops with `contextlib.closing`.
   ```python
