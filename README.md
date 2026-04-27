@@ -30,6 +30,11 @@ Each pattern has a detailed guide with rationale, "when NOT to apply" notes, and
 
 None of the revision types codified in this skill are speculative; they all originate from actual revisions I made to real code.
 
+Model codebases that consistently apply the documented patterns, from largest to smallest:
+- TechSmart Platform (closed source)
+- [Crystal](https://github.com/davidfstr/Crystal-Web-Archiver)
+- [git-visual-compare](https://github.com/davidfstr/git-visual-compare)
+
 ## Installation
 
 Clone this repository into one of the skill directories recognized by your AI coding tool.
