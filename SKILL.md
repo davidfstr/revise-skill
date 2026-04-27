@@ -270,7 +270,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   # Stale socket file — remove it so the next launch starts fresh
   ```
 
-- **[British English spelling](patterns/british_vs_american.md)** -- British spelling in comments/docs (e.g., `behaviour`, `initialise`).
+- **[British English spelling](patterns/british_spelling.md)** -- British spelling in comments/docs (e.g., `behaviour`, `initialise`).
 
 - **[Docstring uses imperative verb](patterns/docstring_verb_form.md)** -- Docstring starts with an imperative verb. Prefer third-person indicative.
   ```python
@@ -345,7 +345,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
 
 ### Type Safety
 
-- **[Variant dispatch missing exhaustive fallback](patterns/assert_never.md)** -- Switch-like dispatch (if/else chain, ternary, match) on a set of known variants without an exhaustive fallback. New variants silently fall through or get swallowed by the final `else`.
+- **[Variant dispatch missing exhaustive fallback](patterns/variant_dispatch_nonexhaustive.md)** -- Switch-like dispatch (if/else chain, ternary, match) on a set of known variants without an exhaustive fallback. New variants silently fall through or get swallowed by the final `else`.
   ```python
   if isinstance(shape, Triangle): ...
   elif isinstance(shape, Square): ...
@@ -369,7 +369,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
       return {"font_size": ...}
   ```
 
-- **[Catching overbroad exception types](patterns/specific_exceptions.md)** -- `except Exception` in a targeted recovery path, or tuple-excepts lumping unrelated failures, both hide real bugs. Define a named exception for each expected-recoverable condition.
+- **[Catching overbroad exception types](patterns/catch_specific_exceptions.md)** -- `except Exception` in a targeted recovery path, or tuple-excepts lumping unrelated failures, both hide real bugs. Define a named exception for each expected-recoverable condition.
   ```python
   try: self._client.list_windows()
   except Exception: pass   # server not ready? or a real bug? -> GvcGuiNotDoneStarting
