@@ -53,7 +53,7 @@ If there are no uncommitted changes, default to reviewing the last commit.
 
 ## Code smells
 
-### Organization
+### Organization (file-level)
 
 - **[Local imports in non-entrypoint modules](patterns/local_imports.md)** -- Project imports placed inside functions instead of at the top of the file.
   ```python
@@ -67,16 +67,14 @@ If there are no uncommitted changes, default to reviewing the last commit.
   def main(): ...                # entry point buried below
   ```
 
-- **[Headings to group definitions](patterns/headings_to_group.md)** -- A file has many top-level definitions (>7-10) with no visual grouping.
-
-- **[Group multiple paragraphs with anonymous block](patterns/grouped_paragraphs.md)** -- Multi-paragraph sections inside a function are labeled by a leading comment but have no visible end. Wrap in `if True:` (Python) or `{ ... }` (JS/TS/Java/C/C++) to delimit both ends.
+- **[Unnecessarily public functions/methods](patterns/privatize_by_default.md)** -- Default functions/methods to `_`-prefixed private; make public only when externally needed. Small public APIs focus attention; private methods are easier to reason about and refactor.
   ```python
-  # File menu
-  if True:
-      file_menu = AppKit.NSMenu.alloc().init()
-      ...
-      main_menu.insertItem_atIndex_(file_menu_item, 1)
+  class TestClient:
+      def call(self, method: str): ...          # only used by ping/list_windows below
+      def ping(self): return self.call("ping")  # -> _call
   ```
+
+- **[Many functions with no grouping section](patterns/headings_to_group.md)** -- A file has many top-level definitions (>7-10) with no visual grouping.
 
 - **[Sections grouped by kind instead of feature/concern](patterns/sections_by_kind.md)** -- Headings like "Constants", "Data Model", "Public API" lump items by what they are, not what feature they serve.
   ```python
@@ -84,23 +82,36 @@ If there are no uncommitted changes, default to reviewing the last commit.
   # --- Public API ---      # public vs. private is rarely useful
   ```
 
-- **[Parameter order mismatches](patterns/parameter_order.md)** -- Parameters (or declarations) listed in a different order than their visual/logical order.
-  ```python
-  def _open_window(raw: bytes, title: str, ...):  # title appears first in UI
-  ```
-
-- **[Blank lines between related blocks](patterns/blank_lines_related_blocks.md)** -- A blank line separates two tightly coupled blocks (e.g., sequential error checks on the same operation).
-
 - **[Symmetric operations split across modules](patterns/symmetric_operations_colocated.md)** -- Send/receive, read/write, encode/decode pairs live in different modules instead of adjacent in the same one.
   ```python
   # _ipc.py has try_send(), but _gui.py has the receive logic inline
   ```
 
-- **[Symmetric branches using guard clause](patterns/symmetric_branches.md)** -- An `if/return` followed by the alternative case at the same level, when both branches are peer alternatives.
+- **[Class-specific helpers not on the using class](patterns/helpers_on_class.md)** -- Module-level `_helper()` used only by one class in the same module. Hoist onto the class as `@staticmethod` to match the real scope.
   ```python
-  if try_send(sock_path, tmp_path):
-      return
-  subprocess.Popen(...)  # looks like main path, but is actually the alternative
+  class TestClient:
+      def _call(self, ...):
+          gvc_log = _read_gvc_log(...)   # -> self._read_gvc_log(...)
+  ```
+
+- **[Definitions/parameters not in visual/logical order](patterns/parameter_order.md)** -- Parameters (or declarations) listed in a different order than their visual/logical order.
+  ```python
+  def _open_window(raw: bytes, title: str, ...):  # title appears first in UI
+  ```
+
+### Organization (within-function)
+
+- **[Single concern divided by blank line](patterns/blank_lines_related_blocks.md)** -- A blank line separates two tightly coupled blocks (e.g., sequential error checks on the same operation).
+
+- **Multiple concerns not separated by blank lines**
+
+- **[Multiple related paragraphs not grouped with anonymous block](patterns/grouped_paragraphs.md)** -- Multi-paragraph sections inside a function are labeled by a leading comment but have no visible end. Wrap in `if True:` (Python) or `{ ... }` (JS/TS/Java/C/C++) to delimit both ends.
+  ```python
+  # File menu
+  if True:
+      file_menu = AppKit.NSMenu.alloc().init()
+      ...
+      main_menu.insertItem_atIndex_(file_menu_item, 1)
   ```
 
 - **[Long then-block with missing/minimal else-block](patterns/long_then_block.md)** -- A long block sits indented under `if <match>:` with the surrounding scope (function, loop, branch) having nothing meaningful after it. Invert to `if not <match>: <exit>` (`return`/`continue`/`raise`) so the body un-indents.
@@ -112,11 +123,11 @@ If there are no uncommitted changes, default to reviewing the last commit.
           break
   ```
 
-- **[Class-specific helpers belong on the using class](patterns/helpers_on_class.md)** -- Module-level `_helper()` used only by one class in the same module. Hoist onto the class as `@staticmethod` to match the real scope.
+- **[Guard clause followed by peer alternative](patterns/symmetric_branches.md)** -- An `if/return` followed by the alternative case at the same level, when both branches are peer alternatives.
   ```python
-  class TestClient:
-      def _call(self, ...):
-          gvc_log = _read_gvc_log(...)   # -> self._read_gvc_log(...)
+  if try_send(sock_path, tmp_path):
+      return
+  subprocess.Popen(...)  # looks like main path, but is actually the alternative
   ```
 
 ### Good Names
@@ -145,15 +156,6 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   ```python
   class GvcSandbox:
       def cleanup(self) -> None: ...   # -> close()
-  ```
-
-### Maintainability
-
-- **[Privatize by default](patterns/privatize_by_default.md)** -- Default functions/methods to `_`-prefixed private; make public only when externally needed. Small public APIs focus attention; private methods are easier to reason about and refactor.
-  ```python
-  class TestClient:
-      def call(self, method: str): ...          # only used by ping/list_windows below
-      def ping(self): return self.call("ping")  # -> _call
   ```
 
 ### Clarity / Anti-Obscurity
