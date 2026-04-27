@@ -1,4 +1,4 @@
-# Docstring verb form
+# Docstring uses imperative verb
 
 ## Quick trigger
 

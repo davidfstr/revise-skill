@@ -1,4 +1,4 @@
-# Clarifying comments on non-obvious code
+# Missing clarifying comments on non-obvious code
 
 ## Quick trigger
 

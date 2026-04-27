@@ -53,7 +53,7 @@ If there are no uncommitted changes, default to reviewing the last commit.
 
 ## Code smells
 
-### Organization
+### Organization (file-level)
 
 - **[Local imports in non-entrypoint modules](patterns/local_imports.md)** -- Project imports placed inside functions instead of at the top of the file.
   ```python
@@ -67,16 +67,14 @@ If there are no uncommitted changes, default to reviewing the last commit.
   def main(): ...                # entry point buried below
   ```
 
-- **[Headings to group definitions](patterns/headings_to_group.md)** -- A file has many top-level definitions (>7-10) with no visual grouping.
-
-- **[Group multiple paragraphs with anonymous block](patterns/grouped_paragraphs.md)** -- Multi-paragraph sections inside a function are labeled by a leading comment but have no visible end. Wrap in `if True:` (Python) or `{ ... }` (JS/TS/Java/C/C++) to delimit both ends.
+- **[Unnecessarily public functions/methods](patterns/privatize_by_default.md)** -- Default functions/methods to `_`-prefixed private; make public only when externally needed. Small public APIs focus attention; private methods are easier to reason about and refactor.
   ```python
-  # File menu
-  if True:
-      file_menu = AppKit.NSMenu.alloc().init()
-      ...
-      main_menu.insertItem_atIndex_(file_menu_item, 1)
+  class TestClient:
+      def call(self, method: str): ...          # only used by ping/list_windows below
+      def ping(self): return self.call("ping")  # -> _call
   ```
+
+- **[Many functions with no grouping section](patterns/missing_sections.md)** -- A file has many top-level definitions (>7-10) with no visual grouping.
 
 - **[Sections grouped by kind instead of feature/concern](patterns/sections_by_kind.md)** -- Headings like "Constants", "Data Model", "Public API" lump items by what they are, not what feature they serve.
   ```python
@@ -84,23 +82,36 @@ If there are no uncommitted changes, default to reviewing the last commit.
   # --- Public API ---      # public vs. private is rarely useful
   ```
 
-- **[Parameter order mismatches](patterns/parameter_order.md)** -- Parameters (or declarations) listed in a different order than their visual/logical order.
-  ```python
-  def _open_window(raw: bytes, title: str, ...):  # title appears first in UI
-  ```
-
-- **[Blank lines between related blocks](patterns/blank_lines_related_blocks.md)** -- A blank line separates two tightly coupled blocks (e.g., sequential error checks on the same operation).
-
 - **[Symmetric operations split across modules](patterns/symmetric_operations_colocated.md)** -- Send/receive, read/write, encode/decode pairs live in different modules instead of adjacent in the same one.
   ```python
   # _ipc.py has try_send(), but _gui.py has the receive logic inline
   ```
 
-- **[Symmetric branches using guard clause](patterns/symmetric_branches.md)** -- An `if/return` followed by the alternative case at the same level, when both branches are peer alternatives.
+- **[Class-specific helpers not on the using class](patterns/helpers_on_class.md)** -- Module-level `_helper()` used only by one class in the same module. Hoist onto the class as `@staticmethod` to match the real scope.
   ```python
-  if try_send(sock_path, tmp_path):
-      return
-  subprocess.Popen(...)  # looks like main path, but is actually the alternative
+  class TestClient:
+      def _call(self, ...):
+          gvc_log = _read_gvc_log(...)   # -> self._read_gvc_log(...)
+  ```
+
+- **[Definitions/parameters not in visual/logical order](patterns/visual_logical_ordering.md)** -- Parameters (or declarations) listed in a different order than their visual/logical order.
+  ```python
+  def _open_window(raw: bytes, title: str, ...):  # title appears first in UI
+  ```
+
+### Organization (within-function)
+
+- **[Single concern divided by blank line](patterns/split_paragraph.md)** -- A blank line separates two tightly coupled blocks (e.g., sequential error checks on the same operation).
+
+- **[Multiple concerns not separated by blank lines](patterns/missing_paragraph_breaks.md)** -- Distinct phases of a function (validation, work, result) sit adjacent without a blank line between them, so the reader can't see phase boundaries.
+
+- **[Multiple related paragraphs not grouped with anonymous block](patterns/grouped_paragraphs.md)** -- Multi-paragraph sections inside a function are labeled by a leading comment but have no visible end. Wrap in `if True:` (Python) or `{ ... }` (JS/TS/Java/C/C++) to delimit both ends.
+  ```python
+  # File menu
+  if True:
+      file_menu = AppKit.NSMenu.alloc().init()
+      ...
+      main_menu.insertItem_atIndex_(file_menu_item, 1)
   ```
 
 - **[Long then-block with missing/minimal else-block](patterns/long_then_block.md)** -- A long block sits indented under `if <match>:` with the surrounding scope (function, loop, branch) having nothing meaningful after it. Invert to `if not <match>: <exit>` (`return`/`continue`/`raise`) so the body un-indents.
@@ -112,11 +123,11 @@ If there are no uncommitted changes, default to reviewing the last commit.
           break
   ```
 
-- **[Class-specific helpers belong on the using class](patterns/helpers_on_class.md)** -- Module-level `_helper()` used only by one class in the same module. Hoist onto the class as `@staticmethod` to match the real scope.
+- **[Guard clause followed by peer alternative](patterns/symmetric_branches.md)** -- An `if/return` followed by the alternative case at the same level, when both branches are peer alternatives.
   ```python
-  class TestClient:
-      def _call(self, ...):
-          gvc_log = _read_gvc_log(...)   # -> self._read_gvc_log(...)
+  if try_send(sock_path, tmp_path):
+      return
+  subprocess.Popen(...)  # looks like main path, but is actually the alternative
   ```
 
 ### Good Names
@@ -139,21 +150,12 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   def render(fd: list[FileDiff], ld_info: LargeDiffInfo | None = None): ...
   ```
 
-- **[`try_X` naming for failable operations](patterns/try_x_naming.md)** -- An operation that returns `None` on failure lacks the `try_` prefix to signal that.
+- **[Failable operation not named `try_X`](patterns/try_x_naming.md)** -- An operation that returns `None` on failure lacks the `try_` prefix to signal that.
 
-- **[`close()` for lifecycle teardown](patterns/lifecycle_close_naming.md)** -- Prefer `close()` over `cleanup`/`teardown`/`dispose` for resource-releasing methods. Matches stdlib convention (`file.close`, `socket.close`) and interops with `contextlib.closing`.
+- **[Lifecycle teardown not named `close`](patterns/lifecycle_close_naming.md)** -- Prefer `close()` over `cleanup`/`teardown`/`dispose` for resource-releasing methods. Matches stdlib convention (`file.close`, `socket.close`) and interops with `contextlib.closing`.
   ```python
   class GvcSandbox:
       def cleanup(self) -> None: ...   # -> close()
-  ```
-
-### Maintainability
-
-- **[Privatize by default](patterns/privatize_by_default.md)** -- Default functions/methods to `_`-prefixed private; make public only when externally needed. Small public APIs focus attention; private methods are easier to reason about and refactor.
-  ```python
-  class TestClient:
-      def call(self, method: str): ...          # only used by ping/list_windows below
-      def ping(self): return self.call("ping")  # -> _call
   ```
 
 ### Clarity / Anti-Obscurity
@@ -180,7 +182,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
       """Test that a user can log in."""  # adds nothing
   ```
 
-- **[Unprefixed comments should describe the next code](patterns/unprefixed_comment_scope.md)** -- Unprefixed comments label *what* the immediately following code does. General commentary belongs under `NOTE:` or in documentation.
+- **[Unprefixed comment is general commentary](patterns/unprefixed_comment_scope.md)** -- Unprefixed comments label *what* the immediately following code does. General commentary belongs under `NOTE:` or in documentation.
   ```python
   # Internal dispatch: the bundled executable is dual-purpose. When another
   # gvc process invokes it with `--gui-server <request_file>` (see below),
@@ -188,19 +190,19 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   if args and args[0] == "--gui-server":
   ```
 
-- **[Branch-scoped comments belong inside the branch](patterns/branch_scoped_comment.md)** -- When a comment explains *why one branch* of a conditional is taken, place it inside that branch — not above the whole `if`/`match`/ternary. Applies to unprefixed and prefixed comments alike.
+- **[Branch-scoped comment placed above the conditional](patterns/branch_scoped_comment.md)** -- When a comment explains *why one branch* of a conditional is taken, place it inside that branch — not above the whole `if`/`match`/ternary. Applies to unprefixed and prefixed comments alike.
   ```python
   # Unix socket paths have a 104-char limit on macOS...     # only applies to one branch
   return root / "runtime" if root is not None else default
   ```
 
-- **[Clarifying comments on non-obvious code](patterns/clarifying_comments.md)** -- A code block responds to a situation non-obviously (e.g., silently swallowing errors), or a paragraph is 5-7+ lines with no label.
+- **[Missing clarifying comments on non-obvious code](patterns/clarifying_comments.md)** -- A code block responds to a situation non-obviously (e.g., silently swallowing errors), or a paragraph is 5-7+ lines with no label.
   ```python
   except (json.JSONDecodeError, TypeError):
       return cls()  # why? intentional? looks like a bug
   ```
 
-- **[`is not None` over truthy check for Optional](patterns/is_not_none_over_truthy.md)** -- Truthy checks on Optional values silently misbehave on falsy-valid states (`Path("")`, `0`, empty collections). Use explicit `is not None`.
+- **[Truthy check for Optional values instead of `is not None`](patterns/is_not_none_over_truthy.md)** -- Truthy checks on Optional values silently misbehave on falsy-valid states (`Path("")`, `0`, empty collections). Use explicit `is not None`.
   ```python
   return root / "runtime" if root else default   # -> `if root is not None`
   ```
@@ -220,7 +222,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   server_sock.close()  # skipped on exception
   ```
 
-- **[Minimize try-block scope](patterns/minimize_try_scope.md)** -- A `try:` block should contain *only* the failable statements. Move success-result assignments into an `else:` clause attached to the `try`.
+- **[Overscoped try-block](patterns/minimize_try_scope.md)** -- A `try:` block should contain *only* the failable statements. Move success-result assignments into an `else:` clause attached to the `try`.
   ```python
   try:
       _set_window_appearance(window, appearance)
@@ -256,7 +258,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   for listener in list(self.listeners):   # -> # clone
   ```
 
-- **[Prefer `const` over `let`/`var` (JS/TS)](patterns/prefer_const_over_let.md)** -- In languages with concise final-by-default variables, default to `const`; let non-`const` itself be the mutability marker.
+- **[`let`/`var` used instead of `const` (JS/TS)](patterns/prefer_const_over_let.md)** -- In languages with concise final-by-default variables, default to `const`; let non-`const` itself be the mutability marker.
   ```typescript
   let result = computeThing();   // never reassigned — should be const
   ```
@@ -268,9 +270,9 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   # Stale socket file — remove it so the next launch starts fresh
   ```
 
-- **[British vs. American English](patterns/british_vs_american.md)** -- British spelling in comments/docs (e.g., `behaviour`, `initialise`).
+- **[British English spelling](patterns/british_spelling.md)** -- British spelling in comments/docs (e.g., `behaviour`, `initialise`).
 
-- **[Docstring verb form](patterns/docstring_verb_form.md)** -- Docstring starts with an imperative verb. Prefer third-person indicative.
+- **[Docstring uses imperative verb](patterns/docstring_verb_form.md)** -- Docstring starts with an imperative verb. Prefer third-person indicative.
   ```python
   def main() -> None:
       """Build ./dist/gvc.app via PyInstaller."""  # -> "Builds ..."
@@ -290,7 +292,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   create_window(html_doc, title, prefs, api)
   ```
 
-- **[if/else → conditional expression](patterns/conditional_expression.md)** -- Both branches of an if/else assign to the same variable; expressions are short.
+- **[if/else statement assigns to same variable](patterns/conditional_expression.md)** -- Both branches of an if/else assign to the same variable; expressions are short.
   ```python
   if large_diff_info is not None:
       html_doc = render(large_diff_info)
@@ -318,13 +320,13 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
 
 ### Type Design
 
-- **[Data clump → dataclass](patterns/data_clump.md)** -- Multiple functions share the same parameter bundle.
+- **[Data clump](patterns/data_clump.md)** -- Multiple functions share the same parameter bundle.
   ```python
   def write_gui_request_file(raw: bytes, title: str) -> Path: ...
   def read_gui_request_file(path: Path) -> tuple[bytes, str]: ...
   ```
 
-- **[Conditionally-meaningful fields](patterns/conditionally_meaningful_fields.md)** -- Fields/params only meaningful when some condition holds (boolean flag, status literal).
+- **[Conditionally-meaningful fields or parameters](patterns/conditionally_meaningful_fields.md)** -- Fields/params only meaningful when some condition holds (boolean flag, status literal).
   ```python
   @dataclass
   class FileDiff:
@@ -343,7 +345,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
 
 ### Type Safety
 
-- **[Exhaustive dispatch on variant types](patterns/assert_never.md)** -- Switch-like dispatch (if/else chain, ternary, match) on a set of known variants without an exhaustive fallback. New variants silently fall through or get swallowed by the final `else`.
+- **[Variant dispatch missing exhaustive fallback](patterns/variant_dispatch_nonexhaustive.md)** -- Switch-like dispatch (if/else chain, ternary, match) on a set of known variants without an exhaustive fallback. New variants silently fall through or get swallowed by the final `else`.
   ```python
   if isinstance(shape, Triangle): ...
   elif isinstance(shape, Square): ...
@@ -367,7 +369,7 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
       return {"font_size": ...}
   ```
 
-- **[Specific exceptions for meaningful failure modes](patterns/specific_exceptions.md)** -- `except Exception` in a targeted recovery path, or tuple-excepts lumping unrelated failures, both hide real bugs. Define a named exception for each expected-recoverable condition.
+- **[Catching overbroad exception types](patterns/catch_specific_exceptions.md)** -- `except Exception` in a targeted recovery path, or tuple-excepts lumping unrelated failures, both hide real bugs. Define a named exception for each expected-recoverable condition.
   ```python
   try: self._client.list_windows()
   except Exception: pass   # server not ready? or a real bug? -> GvcGuiNotDoneStarting

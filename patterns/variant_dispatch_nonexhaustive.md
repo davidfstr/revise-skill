@@ -1,4 +1,4 @@
-# Exhaustive dispatch on variant types
+# Variant dispatch missing exhaustive fallback
 
 **Trigger:** A switch-like dispatch on a set of known variants that exhibits any of these antipatterns:
 

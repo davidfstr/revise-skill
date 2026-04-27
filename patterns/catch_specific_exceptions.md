@@ -1,4 +1,4 @@
-# Specific exceptions for meaningful failure modes
+# Catching overbroad exception types
 
 ## Quick trigger
 

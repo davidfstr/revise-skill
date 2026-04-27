@@ -1,4 +1,4 @@
-# Blank line between adjacent strongly related blocks
+# Single concern divided by blank line
 
 **Trigger:** A blank line separating two code blocks that handle closely related concerns in the same logical flow.
 
@@ -52,7 +52,7 @@ NSOperationQueue.mainQueue().addOperationWithBlock_(_block)
 done.wait(timeout=5.0)
 ```
 
-# Inverse case -- deliberately add a blank line:
+---
 
-- **Paragraph break between phases.** When a function has distinct phases (setup vs. main operation, data preparation vs. dispatch, validation vs. work), a blank line acts as a paragraph break and helps scanning.
-- **Bracket the extent of a duplicated block.** When a region is marked with `NOTE: Duplicated in X and Y` (see [duplicate_code.md](duplicate_code.md)), bookend the duplicated lines with blank lines so a maintainer can see where the "must stay in sync" zone ends. Without the brackets, the duplicated region visually blends into surrounding function-local logic.
+Related:
+- [missing_paragraph_breaks.md](missing_paragraph_breaks.md) — inverse: when distinct concerns sit adjacent without a blank line, *add* one

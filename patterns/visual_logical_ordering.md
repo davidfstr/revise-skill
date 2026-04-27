@@ -1,4 +1,4 @@
-# Parameter order mismatches visual/logical order
+# Definitions/parameters not in visual/logical order
 
 **Trigger:** Function parameters (or field/variable declarations) list data elements in a different order than they appear visually in the UI, or in a different order than the conceptual data model.
 

@@ -1,4 +1,4 @@
-# Prefer `const` over `let`/`var` (JavaScript/TypeScript)
+# `let`/`var` used instead of `const` (JavaScript/TypeScript)
 
 ## Quick trigger
 

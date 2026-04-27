@@ -1,4 +1,4 @@
-# Privatize functions and methods by default
+# Unnecessarily public functions/methods
 
 ## Quick trigger
 

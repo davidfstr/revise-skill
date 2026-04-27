@@ -1,4 +1,4 @@
-# if/else assigning same variable -> conditional expression
+# if/else statement assigns to same variable
 
 **Trigger:** An `if/else` block where both branches assign to the same variable and the expressions are short enough to read inline.
 

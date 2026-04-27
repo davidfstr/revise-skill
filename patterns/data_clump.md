@@ -1,4 +1,4 @@
-# Data clump passed through free functions
+# Data clump
 
 **Trigger:** Two or more standalone functions that accept or return the same bundle of parameters (e.g., `raw: bytes, title: str`).
 
@@ -6,7 +6,7 @@
 
 **When NOT to revise:** When the functions are loosely related and share only one parameter. A single shared parameter is not a data clump.
 
-**Fix:** Introduce a `@dataclass` that holds the shared parameters and convert the free functions into methods on that class.
+**Fix:** Introduce a `@dataclass` that holds the shared parameters. If possible also convert the free functions into methods on that class.
 
 Before:
 ```python

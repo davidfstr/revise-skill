@@ -1,4 +1,4 @@
-# Minimize try-block scope
+# Overscoped try-block
 
 ## Quick trigger
 
@@ -80,5 +80,5 @@ Note that the `except` arm here falls through (it neither raises nor returns), s
 ---
 
 Related:
-- [specific_exceptions.md](specific_exceptions.md) — narrow the `except` *type* alongside narrowing the `try:` *scope*
+- [catch_specific_exceptions.md](catch_specific_exceptions.md) — narrow the `except` *type* alongside narrowing the `try:` *scope*
 - [silent_early_return.md](silent_early_return.md) — when an `except` swallows the error silently, that's a separate bug

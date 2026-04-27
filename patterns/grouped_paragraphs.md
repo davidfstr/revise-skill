@@ -1,4 +1,4 @@
-# Group multiple paragraphs with anonymous block
+# Multiple related paragraphs not grouped with anonymous block
 
 ## Quick trigger
 
@@ -128,5 +128,5 @@ A bare `{ ... }` block also gives each section its own scope, which lets section
 ---
 
 Related:
-- [headings_to_group.md](headings_to_group.md) — module/class-level grouping with comment banners
+- [missing_sections.md](missing_sections.md) — module/class-level grouping with comment banners
 - [unprefixed_comment_scope.md](unprefixed_comment_scope.md) — comments label the *next* code; a scope block makes that label's range explicit

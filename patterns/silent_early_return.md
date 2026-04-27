@@ -38,7 +38,7 @@ The default should be to **raise**: the caller gets a real exception it can log,
 
 ## Fix
 
-**Prefer `raise`.** Define or reuse a specific exception that names the condition. See [specific_exceptions.md](specific_exceptions.md) for how to pick the right type.
+**Prefer `raise`.** Define or reuse a specific exception that names the condition. See [catch_specific_exceptions.md](catch_specific_exceptions.md) for how to pick the right type.
 
 **When log-and-return is the right call**, write a message that gives a field operator something to work with. If no specific convention is already used by the project, use the format `print(..., file=sys.stderr)` with a warning-level message shaped like:
 
@@ -110,5 +110,5 @@ Log-and-return (not raise) is the right call here because the caller is a one-sh
 ---
 
 Related:
-- [specific_exceptions.md](specific_exceptions.md) — when raising, use a named type per failure mode
+- [catch_specific_exceptions.md](catch_specific_exceptions.md) — when raising, use a named type per failure mode
 - [`try_X` naming](try_x_naming.md) — if the function's contract *is* "may miss," put `try_` in the name instead
