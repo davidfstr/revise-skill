@@ -16,23 +16,24 @@ AI-written code is usually drafted in a way that is easy for an AI to *write* bu
 
 The skill checks for **code smells** organized into categories:
 
-| Category | Example patterns |
+| Category | Patterns |
 |----------|-----------------|
-| **Organization (file-level)** | Local imports, bottom-up function order, parameter order mismatches, missing section headings |
-| **Organization (within-function)** | Long then-blocks, missing/extra paragraph breaks, guard clauses that hide a peer alternative |
-| **Good Names** | Vague/generic names, names implying wrong type, abbreviations in APIs |
-| **Clarity / Anti-Obscurity** | Magic numbers, short CLI flags in subprocess calls |
-| **Correctness / Safety** | Silent early returns, manual resource cleanup, unmarked rebindings (`# reinterpret`/`# capture`/`# clone`) |
-| **Formatting & Style** | Em/en dashes (signature AI style), British vs. American English |
-| **Concision** | Unnecessary temporary variables, if/else → conditional expression |
-| **Type Design** | Data clumps → dataclass, conditionally-meaningful fields |
-| **Type Safety** | Missing `assert_never`, untyped parameters, `type: ignore` / `cast` overuse |
+| **Organization (file-level)** | local imports, bottom-up function order, unnecessarily public methods, many functions with no grouping section, sections grouped by kind not feature, symmetric operations split across modules, class-specific helpers off the using class, parameters not in visual/logical order |
+| **Organization (within-function)** | single concern divided by blank line, multiple concerns without paragraph break, multi-paragraph sections not delimited, long then-block with empty else, guard clause hiding a peer alternative |
+| **Good Names** | vague/generic names, names implying wrong type, abbreviations in APIs, failable operations missing `try_` prefix, lifecycle teardown not named `close` |
+| **Clarity / Anti-Obscurity** | magic numbers, short CLI flags in subprocess calls, impl details in docstrings, obvious/redundant docstrings, unprefixed comments used as commentary, branch-scoped comments above the conditional, missing clarifying comments, truthy check instead of `is not None` |
+| **Correctness / Safety** | silent early return on failure, manual resource cleanup, overscoped `try` block, counter-based wait loops, unmarked rebindings (`# reinterpret`/`# rename`/`# capture`/`# clone`), `let`/`var` instead of `const` (JS/TS) |
+| **Formatting & Style** | em/en dashes (signature AI style), British vs. American English, imperative verbs in docstrings |
+| **Concision** | duplicate code, unnecessary temporary variables, if/else → conditional expression, dead code, unnecessarily quoted type annotations, hand-rolled caching |
+| **Type Design** | data clumps → dataclass, conditionally-meaningful fields, ignored `None` parameters |
+| **Type Safety** | non-exhaustive variant dispatch (missing `assert_never`), `type: ignore` / `cast` overuse, untyped parameters, bare `dict` at serialization boundaries, overbroad `except` clauses |
 
 Each pattern has a detailed guide with rationale, "when NOT to apply" notes, and before/after examples — see the [patterns/](patterns/) directory.
 
-None of the revision types codified in this skill are speculative; they all originate from actual revisions I made to real code.
+None of the revision types codified in this skill are speculative; they all [originate from actual revisions I made to real code](#how-patterns-are-added).
 
 Model codebases that consistently apply the documented patterns, from largest to smallest:
+
 - TechSmart Platform (closed source)
 - [Crystal](https://github.com/davidfstr/Crystal-Web-Archiver)
 - [git-visual-compare](https://github.com/davidfstr/git-visual-compare)
@@ -73,6 +74,12 @@ git clone https://github.com/davidfstr/revise-skill.git ~/.claude/skills/revise
 
 > **Note:** `~/.claude/skills/revise` is the one path that works for both VS Code Copilot and Claude Code.
 
+## Optional companion: Revise MCP server
+
+The Revise Skill is designed to work alongside the [Revise MCP server](https://dafoster.net/projects/revise-mcp/), which exposes refactoring tools (`rename_symbol`, `move_string_in_file`, `indent_dedent`, `outline_file`) that let an agent edit code more efficiently than line-based text edits. When the MCP server is installed, the skill instructs the agent to reach for those tools where appropriate.
+
+The MCP server is an **optional dependency** — the skill works without it, falling back to standard text edits.
+
 ## Usage
 
 Invoke the skill and optionally specify what to review:
@@ -100,6 +107,16 @@ Type `/revise` in Copilot Chat, optionally followed by an argument:
 /revise
 /revise uncommitted
 ```
+
+## How patterns are added
+
+Every pattern in this skill traces back to a real revision I made by hand to AI-drafted code. The workflow:
+
+1. Revise a recent AI-drafted commit by hand and push the revisions as a single commit.
+2. Invoke the skill on that commit with phrasing like *"Learn any new revise patterns from commit `<SHA>`"*.
+3. The skill reads the diff (and commit message), interviews me about non-obvious choices and any patterns the diff *should* have triggered but didn't, then either drafts a new pattern file or refines an existing one.
+
+This keeps the catalog grounded in actual friction encountered in practice rather than speculative best practices. See [SKILL.md](SKILL.md#how-to-learn-new-patterns-from-a-commit) for the full procedure.
 
 ## Structure
 
