@@ -18,9 +18,11 @@ The skill checks for **code smells** organized into categories:
 
 | Category | Example patterns |
 |----------|-----------------|
-| **Organization** | Local imports, bottom-up function order, parameter order mismatches, missing section headings |
+| **Organization (file-level)** | Local imports, bottom-up function order, parameter order mismatches, missing section headings |
+| **Organization (within-function)** | Long then-blocks, missing/extra paragraph breaks, guard clauses that hide a peer alternative |
 | **Good Names** | Vague/generic names, names implying wrong type, abbreviations in APIs |
-| **Clarity** | Magic numbers, short CLI flags in subprocess calls |
+| **Clarity / Anti-Obscurity** | Magic numbers, short CLI flags in subprocess calls |
+| **Correctness / Safety** | Silent early returns, manual resource cleanup, unmarked rebindings (`# reinterpret`/`# capture`/`# clone`) |
 | **Formatting & Style** | Em/en dashes (signature AI style), British vs. American English |
 | **Concision** | Unnecessary temporary variables, if/else → conditional expression |
 | **Type Design** | Data clumps → dataclass, conditionally-meaningful fields |
@@ -106,11 +108,13 @@ revise/
 ├── README.md                      # This file
 ├── SKILL.md                       # Skill definition (procedure + smell index)
 ├── organization-guidelines.md     # How the skill itself is organized
-└── patterns/                      # Detailed guide for each code smell
-    ├── local_imports.md
-    ├── functions_ordered_bottom_up.md
-    ├── vague_generic_names.md
-    └── ... (patterns)
+├── patterns/                      # Detailed guide for each code smell
+│   ├── local_imports.md
+│   ├── functions_ordered_bottom_up.md
+│   ├── vague_generic_names.md
+│   └── ... (patterns)
+└── reference/                     # Reference docs for tools used by the skill
+    └── rename_symbol.md
 ```
 
 ## License
