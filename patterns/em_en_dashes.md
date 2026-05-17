@@ -36,6 +36,6 @@ def select_menuitem(self, shortcut: str) -> None:
     """
 ```
 
-The trigger only fires for em/en dashes used to attach trailing *sentence fragments* in prose comments or docstring body text. List-item separators in `Raises:` / `Returns:` / `Arguments:` blocks (and similar bulleted name-then-description listings) are exempt.
+The trigger only applies for em/en dashes used to attach trailing *sentence fragments* in prose comments or docstring body text. List-item separators in `Raises:` / `Returns:` / `Arguments:` blocks (and similar bulleted name-then-description listings) are exempt.
 
 If a project uses a different convention for these listings (e.g., `: ` or `\n    description`), match the project's existing style — but don't invent the colon when `--` is already in use throughout the file.

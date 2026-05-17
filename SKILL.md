@@ -161,6 +161,20 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
       def cleanup(self) -> None: ...   # -> close()
   ```
 
+- **[Function name references an uncommon implementation technique](patterns/implementation_technique_in_name.md)** -- A function/section name references a named technique that the file's likely readers won't recognize (e.g. FLIP for the animation technique). Rename to describe the domain action; move the technique reference (with link) into an implementation comment. Does NOT apply to commonly-recognized techniques (`debounce`, `memoize`).
+  ```javascript
+  function _flipAnimate(elements, mutate) { ... }   // -> _reorderOutlineRowsWithAnimation
+  // section header "// Flip Animation"             // -> "// Reorder Animation"
+  ```
+
+- **[Short/generic/unscoped name in a shared namespace](patterns/unscoped_name_in_shared_namespace.md)** -- When the language/tooling doesn't supply per-file namespacing (JS without modules, CSS selectors, C top-level symbols), generic top-level names risk silent collision and read ambiguously at call sites. Prefix by subsystem/element/feature. For JS event handlers, name after the element the listener is attached to.
+  ```javascript
+  outline.addEventListener("keydown", _onHandleKeydown);   // -> _onOutlineKeydown
+  ```
+  ```css
+  .outline-row { ... }                                     /* -> .gvc-outline-row */
+  ```
+
 ### Clarity / Anti-Obscurity
 
 - **[Magic numbers](patterns/magic_numbers.md)** -- Numeric literals used directly in logic where the meaning isn't obvious.
@@ -279,6 +293,18 @@ An `mcp__revise__rename_symbol` tool is available for quickly renaming functions
   ```python
   def main() -> None:
       """Build ./dist/gvc.app via PyInstaller."""  # -> "Builds ..."
+  ```
+
+- **[Single-line if-statement](patterns/single_line_if_statement.md)** -- An `if` whose condition and non-trivial body share one line is easy to miss when scanning, and usually overflows line-length anyway. Break the body onto its own line. Short one-token guards (`return`/`break`/`continue`/`throw`) are an idiomatic exception.
+  ```javascript
+  if (e.dataTransfer) e.dataTransfer.dropEffect = "move";    // -> break body to next line
+  if (rows.length === 0) break;                              // OK, idiomatic guard
+  ```
+
+- **[Multi-line if/loop body without braces (optional-brace languages)](patterns/optional_brace_omitted_on_multiline.md)** -- In JS/TS/C/C++/Java/Perl, omitting braces on a multi-line `if`/`else`/`for`/`while` invites goto-fail-style edit bugs (a second indented statement reads as part of the block but isn't). Always brace. Does not apply to Python (indentation is the scope) or Go/Rust (braces mandatory).
+  ```javascript
+  if (rows.length === 0)
+      break;            // -> wrap break in braces
   ```
 
 ### Concision
